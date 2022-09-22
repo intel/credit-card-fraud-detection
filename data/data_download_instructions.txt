@@ -1,0 +1,23 @@
+###Data dwonloading steps#####
+
+**DataSet**: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+
+The Credit Card Fraud dataset can be downloaded from kaggle and extracted in a folder. Please execute the following steps to download the dataset.
+
+1) Create a data folder using command: mkdir data <br>
+2) Create a kaggle folder using mkdir kaggle <br>
+3 )Navigate inside the kaggle folder using the command cd kaggle <br>
+4) Install kaggle if not done using the below command: <br>
+pip install kaggle<br>
+5) Login to Kaggle account. Go to 'Account Tab' & select 'Create a new API token'. This will trigger the download of kaggle.json file.
+This file contains your API credentials.<br>
+6) Move the downloaded 'kaggle.json' file to folder 'kaggle'<br>
+7) Execute the following command:<br>
+chmod 600 ~/.kaggle/kaggle.json<br>
+8) Export the kaggle username & token to the enviroment:<br>
+export KAGGLE_USERNAME=@@@@@@@@$#$#$<br>
+export KAGGLE_KEY=@#@#@#@#@#@#!!@@@@##########<br>
+9) Run the following command to download the dataset:
+kaggle datasets download -d mlg-ulb/creditcardfraud<br>
+"creditcardfraud.zip" will get downloaded in your kaggle folderd<br>
+10) Extract the csv file from the creditcardfraud.zip and move it to the /data folder of the github working directory 

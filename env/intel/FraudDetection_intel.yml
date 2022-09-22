@@ -1,0 +1,9 @@
+name: FraudDetection_intel
+channels:
+  - intel
+dependencies:
+  - intelpython3_full
+  - pip=21.2.4
+  - pip:
+    - lightgbm==3.3.2
+    - matplotlib==3.5.3
