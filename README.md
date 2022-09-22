@@ -1,4 +1,3 @@
-# INTEL-REVIEW
 # **Fraud Detection using an ensemble technique - Intel optimized DBSCAN clustering followed by Light Gradient Boosted Model (LGBM)**
 
 Credit card transactions can be stratified using DBSCAN clustering. The stratified data then can be used to train an LGBM model to identify fraudulent transactions. The Intel AI Analytics Toolkit (AI Kit) gives data scientists, AI developers, and researchers familiar Python tools and frameworks to accelerate end-to-end data science and analytics pipelines on Intel architectures. The components are built using oneAPI libraries for low-level compute optimizations.We will use the The Intel Extension for Scikit-learn and daal4py to accelerate the clustering and inference stages of this solution.
@@ -6,7 +5,7 @@ Credit card transactions can be stratified using DBSCAN clustering. The stratifi
 Table of Contents
 # **Contents**
  - [Purpose](#purpose)
- - [End-to-end Solution](#end-to-end-solution)
+ - [Reference Solution](#reference-solution)
  - [Comparing Performance Benefits](#comparing-performance-benefits)
  - [Key Takeaways](#key-takeaways)
  - [Appendix](#appendix)
@@ -278,7 +277,7 @@ Intel optimizations can be applied to DBSCAN Clustering through Intel Extension 
 
 ![accuracy_metrics_results](assets/accuracy_metrics.png)
 
-### **Takeaways**
+### **Key Takeaways**
 
 From the reference kit, we can observe that the Intel Extension for Scikit-learn can accelerate DBSCAN clustering for stratifying the data by 30%. Clustering greatly helps training a more accurate model. For inference, using daal4py instead of stock can accelerate handling batch data by up to 3.86x and streaming data by 4.15x.
 
