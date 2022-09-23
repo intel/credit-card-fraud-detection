@@ -293,7 +293,7 @@ Fraud detection can be a compute intensive operation for inference workloads giv
 | Software                          | **Stock**: scikit-learn(v1.1.2), lightgbm(v3.3.2) <br> **Intel**: intelpython3_full(v2022.1.0), Intel Extension for scikit-learn(v2021.6.0), lightgbm(v3.3.2), daal4py(2021.6.0)
 | What you will learn               | Intel® oneAPI performance advantage over the stock versions on model inference
 
-**Note on the Hardware Infrastructure:** The Azure based D8s_v5 machine is not a deliberate choice here and users are free to choose other architectures as well. However, please keep in mind that the performance gains may vary with the machine charactersistics such as generation, base speed, processor count, memory etc.
+**Note on the Hardware Infrastructure:** The Azure based D8s_v5 machine was chosen as a typical VM used by customers. Please do not consider this as a recommendation for the workloads benchmarked here. Users are free to choose other architectures as well. However, please keep in mind that the performance gains may vary with the machine charactersistics such as generation, base speed, processor count, memory etc.
 
 ### Dataset and Base code
 
