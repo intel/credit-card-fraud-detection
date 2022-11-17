@@ -27,9 +27,9 @@ This section provides key implementation details on the proposed reference solut
 
 
 ### **Proposed Architecture**
-A schematic of the proposed reference architecture is shown in the following figure. We start off with Data Ingestion followed by DBSCAN clustering. Data pertaining to select clusters which have the maximum ratio of fraudulent transactions are then chosen for LGBM based supervised ML training and hyperparameter tuning. 
+A schematic of the proposed reference architecture is shown in the following figure. We start off with Data Ingestion followed by DBSCAN clustering. The raw data is highly skewed with fraudulent transactions making up <1% of the total data. Training a model on this will likely result in a biased model. We address this using DBSCAN Clustering. It helps group transactions that are similar in the feature space together. data pertaining to select clusters which have the maximum ratio of fraudulent transactions are then chosen for LGBM based supervised ML training and hyperparameter tuning. The dataset post clustering will be significantly undersampled **from 200K to less than 1000** but the ratio of fraudulent transactions will be improved to **>30%**. And we will see - because of the improved stratification - the performance of a model trained on an undersampled (clustered) dataset is still better than that of a model trained on the full dataset. 
 
-DBSCAN Clustering is used here to "enhance" the ingested data and improve accuracy on unseen test data. Hyperparameter tuning with cross validation is included to optimize the model configuration and further enhance prediction accuracy on test data - it will directly provide the best performing model configuration for running inference.
+Post clustering we can perform Hyperparameter tuning with cross validation to optimize the model configuration and further enhance prediction accuracy on test data - it will directly provide the best performing model configuration for running inference.
 
 This trained LGBM model can then be used for Streaming/Batch Prediction. 
 
@@ -260,6 +260,7 @@ Intel optimizations can be applied to DBSCAN Clustering through Intel Extension 
 2. Using daal4py accelerates performance by up to 3.86x for batch inference, which is critical in model development. More importantly it is 4.15x faster for streaming inference. This means inference can happen either much quicker or on a less powerful edge location when the model is deployed in the field.
 3. The performance benefit of using post-clustering data translates into a higher accuracy. For a model trained using clustered data, we get a higher f1_score (0.92) compared to that for a model trained using the full dataset (0.89). This is significant because of the scale at which financial transactions occur. About 100 million credit card transactions occur every day in the US. Assuming 0.2% (200000) transactions are fraudulent, a 3% better accuracy would mean up to 6000 more transactions would be correctly classified, daily.
 
+**Note on Inference Numbers:** Once a 70/30 train-test split is done on the original dataset, the test dataset has ~85K samples. As you can see from the chart for inference benchmarks, we have reported data for 170K, 425K and 850K. This was done via duplicating the test dataset purely to investigate how a larger datasize would affect scalability of the performance because in the real world, it is likely that the dataset sizes would be much larger than the ones chosen here.
 
 #### 1. Executing DBSCAN clustering using stock scikit-learn vs. Intel® Extension for Scikit-Learn
 
