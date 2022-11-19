@@ -27,7 +27,7 @@ This section provides key implementation details on the proposed reference solut
 
 
 ### **Proposed Architecture**
-A schematic of the proposed reference architecture is shown in the following figure. We start off with Data Ingestion followed by DBSCAN clustering. The raw data is highly skewed with fraudulent transactions making up <1% of the total data. Training a model on this will likely result in a biased model. We address this using DBSCAN Clustering. It helps group transactions that are similar in the feature space together. data pertaining to select clusters which have the maximum ratio of fraudulent transactions are then chosen for LGBM based supervised ML training and hyperparameter tuning. The dataset post clustering will be significantly undersampled **from 200K to less than 1000** but the ratio of fraudulent transactions will be improved to **>30%**. And we will see - because of the improved stratification - the performance of a model trained on an undersampled (clustered) dataset is still better than that of a model trained on the full dataset. 
+A schematic of the proposed reference architecture is shown in the following figure. We start off with Data Ingestion followed by DBSCAN clustering. The raw data is highly skewed with fraudulent transactions making up <0.2% of the total data. Training a model on this will likely result in a biased model. We address this using DBSCAN Clustering. It helps group transactions that are similar in the feature space together. data pertaining to select clusters which have the maximum ratio of fraudulent transactions are then chosen for LGBM based supervised ML training and hyperparameter tuning. The dataset post clustering will be significantly undersampled **from 200K to less than 1000** but the ratio of fraudulent transactions will be improved to **>30%**. And we will see - because of the improved stratification - the performance of a model trained on an undersampled (clustered) dataset is still better than that of a model trained on the full dataset. 
 
 Post clustering we can perform Hyperparameter tuning with cross validation to optimize the model configuration and further enhance prediction accuracy on test data - it will directly provide the best performing model configuration for running inference.
 
@@ -79,7 +79,7 @@ Please download the data using the instructions provided in the /data folder and
 
 The clustering and training portion of the benchmarking can be run using the python script `run_benchmarks_train.py`. The script **reads data**, **performs DBSCAN clustering** and filters data belonging to a cluster which has the maximum proportion of fraudulent transactions.
 
-The script then **trains an LGBM model** on the full dataset as well as the clustered data. Both trained models are saved for inference - doing so will help us quantify the benefit of using clustering as opposed to using the full dataset directly for model training. This script will also report on the execution time for these steps. 
+The script then **trains an LGBM model** on the full dataset **(~200K data points with <0.2% Fraud Rate)** as well as the clustered data **(<1000 data points with >30% Fraud Rate)**. Both trained models are saved for inference - doing so will help us quantify the benefit of using clustering as opposed to using the full dataset directly for model training. This script will also report on the execution time for these steps. 
 
 The run benchmark script takes the following arguments:
 
@@ -218,7 +218,9 @@ You can then move ahead to training an LGBM model using intel packages.
 
 ### **Training/Hyperparameter Tuning**
 
-There will be only one change here compared to the command for training a model with the stock packages, the addition of an argument which enables the use of intel-optimized packages, which in case of training/hyperparameter tuning would be Intel Extension for Scikit-Learn. To run with intel technologies, logging the performance to `logs`, we would run (after activating the intel environment):
+There will be only one change here compared to the command for training a model with the stock packages, the addition of an argument which enables the use of intel-optimized packages, which in case of training/hyperparameter tuning would be Intel Extension for Scikit-Learn. Once again here the training/hyperparameter tuning exercise will be run for the full dataset **(~200K data points with <0.2% Fraud Rate)** as well as the clustered data **(<1000 data points with >30% Fraud Rate)**. 
+
+To run with intel technologies, logging the performance to `logs`, we would run (after activating the intel environment):
 
 ```shell
 python ./src/run_benchmarks_train.py -i -l ./logs/intel_training.log
