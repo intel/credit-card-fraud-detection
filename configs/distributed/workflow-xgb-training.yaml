@@ -1,0 +1,20 @@
+env:
+  num_node: 2
+  node_ips: #the first item in the ip list is the master ip, pls make sure that the ip doesn't contain space in the end
+  #  - IP1
+  #  - IP2
+  tmp_path: <path to work dir>
+  data_path: <path to work/data dir>
+  config_path: <path to work/fraud-detection-usecase/configs/distributed dir>
+
+training:
+  input_data_path: node_edge_data
+  input_data_format: csv
+  train_config_file: xgb-training.yaml
+  train_framework: pandas
+  ray_params:
+    num_actors: 10
+    cpus_per_actor: 15
+    elastic_training: True
+    max_failed_actors: 4
+    max_actor_restarts: 8

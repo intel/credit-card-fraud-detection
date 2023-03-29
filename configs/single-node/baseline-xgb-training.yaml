@@ -1,0 +1,17 @@
+data_spec:
+  target_col: is_fraud?
+  ignore_cols: ['user', 'card', 'merchant_name', 'split']
+  data_split:
+    train: df[df["year"]<2018]
+    valid: df[df["year"]==2018]
+    test: df[df["year"]>2018]
+
+model_spec:
+  model_type: xgboost
+  model_params:
+    learning_rate: 0.1
+    eval_metric: 'aucpr'
+    objective: 'binary:logistic'
+  training_params:
+    num_boost_round: 1000
+    verbose_eval: 100

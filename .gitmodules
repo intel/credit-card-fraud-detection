@@ -1,0 +1,6 @@
+[submodule "classical-ml"]
+	path = classical-ml
+	url = https://github.com/intel/recommender-system-with-distributed-classical-ml
+[submodule "gnn-analytics"]
+	path = gnn-analytics
+	url = https://github.com/intel/graph-neural-networks-and-analytics

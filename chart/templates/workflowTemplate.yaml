@@ -1,0 +1,131 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .Values.metadata.name }}
+spec:
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: preprocess
+            template: fraud-detection
+            arguments:
+              parameters:
+                - name: mode
+                  value: preprocess
+                - name: workflow
+                  value: eap-fraud-detection-classical-ml
+          - name: gnn-analytics
+            template: fraud-detection
+            arguments:
+              parameters:
+                - name: mode
+                  value: gnn-analytics
+                - name: workflow
+                  value: eap-fraud-detection-gnn
+            dependencies:
+              - preprocess
+          - name: xgb-training
+            template: fraud-detection
+            arguments:
+              parameters:
+                - name: mode
+                  value: xgb-training
+                - name: workflow
+                  value: eap-fraud-detection-classical-ml
+            dependencies:
+              - gnn-analytics
+        failFast: true
+    - name: fraud-detection
+      inputs:
+        parameters:
+          - name: mode
+          - name: workflow
+        {{- if eq .Values.dataset.type "s3" }}
+        artifacts:
+          - name: dataset
+            path: /fraud-detection/data/raw_data
+            s3:
+              key: {{ .Values.dataset.s3.key }}
+        {{ end }}
+      container:
+        image: '{{ .Values.image.name }}:{{"{{ inputs.parameters.workflow }}"}}'
+        command:
+          - /fraud-detection/wrapper.sh
+        args:
+          - '--{{"{{inputs.parameters.mode}}"}}'
+        env:
+          - name: http_proxy
+            value: '{{"{{workflow.parameters.http_proxy}}"}}'
+          - name: https_proxy
+            value: '{{"{{workflow.parameters.http_proxy}}"}}'
+        resources:
+          requests:
+            memory: "200Gi"
+        volumeMounts:
+          - name: dshm
+            mountPath: /dev/shm
+          - name: preprocess-output-dir
+            mountPath: /fraud-detection/data/edge_data
+          - name: gnn-output-dir
+            mountPath: /fraud-detection/data/node_edge_data
+        {{ if eq .Values.dataset.type "local" }}
+          - name: dataset-dir
+            mountPath: /fraud-detection/data/raw_data
+        {{ end }}
+        {{ if eq .Values.dataset.type "nfs" }}
+          - name: dataset-dir
+            mountPath: /fraud-detection/data/raw_data
+            subPath: {{ .Values.dataset.nfs.subPath }}
+        {{ end }}
+        imagePullPolicy: Always
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+        {{ if eq .Values.dataset.type "local" }}
+      - name: dataset-dir
+        hostPath:
+          path: {{ .Values.dataset.local.dataset_path }}
+      - name: preprocess-output-dir
+        hostPath: 
+          path: {{ .Values.dataset.local.preprocess_path }}
+      - name: gnn-output-dir
+        hostPath:
+          path: {{ .Values.dataset.local.gnn_path }}
+        {{ end }}
+        {{ if eq .Values.dataset.type "nfs" }}
+      - name: dataset-dir
+        nfs: 
+          server: {{ .Values.dataset.nfs.server }}
+          path: {{ .Values.dataset.nfs.path }}
+          readOnly: true
+        {{ end }}
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: http_proxy
+        value: {{ .Values.proxy }}
+  {{ if eq .Values.dataset.type "nfs" }}
+  volumeClaimTemplates:
+    - metadata:
+        name: preprocess-output-dir
+        creationTimestamp: null
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 4Gi
+        storageClassName: nfs-client
+    - metadata:
+        name: gnn-output-dir
+        creationTimestamp: null
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 38Gi
+        storageClassName: nfs-client
+  {{ end }}

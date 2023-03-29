@@ -1,0 +1,10 @@
+env:
+  num_node: 1
+  node_ips: []
+data_preprocess:
+  input_data_path: raw_data
+  input_data_format: csv
+  output_data_path: edge_data
+  output_data_format: csv
+  dp_config_file: data-preprocessing.yaml
+  dp_framework: pandas

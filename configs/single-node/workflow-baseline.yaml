@@ -1,0 +1,8 @@
+env:
+  num_node: 1
+  node_ips: []
+training:
+  input_data_path: edge_data
+  input_data_format: csv
+  train_config_file: baseline-xgb-training.yaml
+  train_framework: pandas

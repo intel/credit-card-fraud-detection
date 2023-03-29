@@ -1,0 +1,17 @@
+metadata:
+  name: fraud-detection
+proxy: nil
+image:
+  name: intel/ai-workflows
+dataset:
+  type: <nfs/s3/local>
+  local:
+    dataset_path: nil
+    preprocess_path: nil
+    gnn_path: nil
+  nfs:
+    server: nil
+    path: nil
+    subPath: nil
+  s3:
+    key: nil
