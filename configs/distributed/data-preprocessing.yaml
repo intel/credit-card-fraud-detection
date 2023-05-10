@@ -1,21 +1,7 @@
-data_preparation:
+pre_splitting_transformation:
   - normalize_feature_names: 
     - replace_chars: {' ': '_'}
     - lowercase: True
-  # - rename_feature_names:
-  # - drop_features:
-  # - outlier_treatment:
-  - adjust_datatype:
-      merchant_city: category
-      merchant_state: category
-      mcc: category 
-      zip: str
-      zip: category
-    
-
-# data_cleaning: 
-
-feature_engineering:
   - categorify:
       merchant_name: merchant_id 
       is_fraud?: is_fraud?
@@ -26,6 +12,10 @@ feature_engineering:
   - time_to_seconds:
       time: time
   - change_datatype:
+      merchant_city: category
+      merchant_state: category
+      mcc: category 
+      zip: ['str','category']
       amount: float32
       time: uint8 
       card_id: float32
@@ -58,15 +48,8 @@ data_splitting:
     # random_split:
     #     test_ratio: 0.1
         
-feature_encoding: 
+post_splitting_transformation: 
     - target_encoding: 
         target_col: is_fraud?
         feature_cols: ["merchant_city", "merchant_state", "zip", "mcc"]
         smoothing: 0.001
-    - label_encoding:
-        feature_cols: ['is_fraud?']
-
-
-# last_mile_processing:
-#   drop_features: 
-#   drop_rows: 

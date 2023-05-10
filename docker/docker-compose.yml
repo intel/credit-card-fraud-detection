@@ -12,11 +12,11 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-classical-ml
+    image: intel/ai-workflows:beta-fraud-detection-classical-ml
     privileged: true
     volumes:
-      - ${DATASET_DIR}/raw_data:/fraud-detection/data/raw_data
-      - ${OUTPUT_DIR}/data/edge_data:/fraud-detection/data/edge_data
+      - ${DATASET_DIR}/raw_data:/workspace/data/raw_data
+      - ${OUTPUT_DIR}/data/edge_data:/workspace/data/edge_data
       - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
     working_dir: /fraud-detection/classical-ml
   gnn-analytics:
@@ -32,15 +32,16 @@ services:
       - http_proxy:${http_proxy}
       - https_proxy:${https_proxy}
       - no_proxy:${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-gnn
+    image: intel/ai-workflows:beta-fraud-detection-gnn
     network_mode: "host"
     privileged: true
     shm_size: 200GB
     volumes:
-      - ${OUTPUT_DIR}/data/edge_data:/fraud-detection/data/edge_data
-      - ${OUTPUT_DIR}/data/node_edge_data:/fraud-detection/data/node_edge_data
-      - ${OUTPUT_DIR}/gnn_checkpoint:/fraud-detection/checkpoint
-    working_dir: /fraud-detection/gnn-analytics/src
+      - ${OUTPUT_DIR}/data/edge_data:/DATA_IN
+      - ${OUTPUT_DIR}/data/node_edge_data:/DATA_OUT
+      - ${OUTPUT_DIR}/gnn_checkpoint:/GNN_TMP
+      - ${CONFIG_DIR:-$PWD/../configs/single-node}:/CONFIGS
+    working_dir: /
   baseline-training:
     build:
       args:
@@ -54,12 +55,13 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-classical-ml
+    image: intel/ai-workflows:beta-fraud-detection-classical-ml
     privileged: true
     volumes:
-      - ${OUTPUT_DIR}/data/edge_data:/fraud-detection/data/edge_data
-      - ${OUTPUT_DIR}/baseline/models:/workspace/tmp/models
       - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
+      - ${OUTPUT_DIR}/data/edge_data:/workspace/data/edge_data
+      - ${OUTPUT_DIR}/baseline/models:/workspace/tmp/models
+      - ${OUTPUT_DIR}/baseline/logs:/workspace/tmp/logs
     working_dir: /fraud-detection/classical-ml
   xgb-training:
     build:
@@ -71,17 +73,18 @@ services:
       context: ../
     command: '/fraud-detection/wrapper.sh --xgb-training'
     depends_on:
-      gnn-analytics:
-        condition: service_completed_successfully
+     gnn-analytics:
+       condition: service_completed_successfully
     environment:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-classical-ml
+    image: intel/ai-workflows:beta-fraud-detection-classical-ml
     privileged: true
     volumes:
-      - ${OUTPUT_DIR}/data/node_edge_data:/fraud-detection/data/node_edge_data
+      - ${OUTPUT_DIR}/data/node_edge_data:/workspace/data/node_edge_data
       - ${OUTPUT_DIR}/xgb-training/models:/workspace/tmp/models
+      - ${OUTPUT_DIR}/xgb-training/logs:/workspace/tmp/logs
       - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
     working_dir: /fraud-detection/classical-ml
   dev-gnn-analytics:
@@ -97,19 +100,20 @@ services:
       - http_proxy:${http_proxy}
       - https_proxy:${https_proxy}
       - no_proxy:${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-gnn
+    image: intel/ai-workflows:beta-fraud-detection-gnn
     network_mode: "host"
     privileged: true
     stdin_open: true
     tty: true
     shm_size: ${SHM_SIZE:-200GB}
     volumes:
-      - ${WORKSPACE:-$PWD/../gnn-analytics}:/fraud-detection/gnn-analytics
-      - ${OUTPUT_DIR}/data/edge_data:/fraud-detection/data/edge_data
-      - ${OUTPUT_DIR}/data/node_edge_data:/fraud-detection/data/node_edge_data
-      - ${OUTPUT_DIR}/gnn_checkpoint:/fraud-detection/checkpoint
+      - ${WORKSPACE:-$PWD/../gnn-analytics}:/host
+      - ${OUTPUT_DIR}/data/edge_data:/DATA_IN
+      - ${OUTPUT_DIR}/data/node_edge_data:/DATA_OUT
+      - ${OUTPUT_DIR}/gnn_checkpoint:/GNN_TMP
+      - ${CONFIG_DIR:-$PWD/../configs/single-node}:/CONFIGS
       - $PWD/../wrapper.sh:/fraud-detection/wrapper.sh
-    working_dir: /fraud-detection/gnn-analytics/src
+    working_dir: /
   dev-baseline-training:
     build:
       args:
@@ -123,15 +127,16 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-classical-ml
+    image: intel/ai-workflows:beta-fraud-detection-classical-ml
     privileged: true
     stdin_open: true
     tty: true
     volumes:
-      - ${OUTPUT_DIR}/data/edge_data:/fraud-detection/data/edge_data
-      - ${OUTPUT_DIR}/baseline/models:/workspace/tmp/models
-      - ${WORKSPACE:-$PWD/../classical-ml}:/fraud-detection/classical-ml
       - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
+      - ${OUTPUT_DIR}/data/edge_data:/workspace/data/edge_data
+      - ${OUTPUT_DIR}/baseline/models:/workspace/tmp/models
+      - ${OUTPUT_DIR}/baseline/logs:/workspace/tmp/logs
+      - ${WORKSPACE:-$PWD/../classical-ml}:/fraud-detection/classical-ml
       - $PWD/../wrapper.sh:/fraud-detection/wrapper.sh
     working_dir: /fraud-detection/classical-ml
   dev-xgb-training:
@@ -147,14 +152,15 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:eap-fraud-detection-classical-ml
+    image: intel/ai-workflows:beta-fraud-detection-classical-ml
     privileged: true
     stdin_open: true
     tty: true
     volumes:
-      - ${OUTPUT_DIR}/data/node_edge_data:/fraud-detection/data/node_edge_data
-      - ${OUTPUT_DIR}/xgb-training/models:/workspace/tmp/models
-      - ${WORKSPACE:-$PWD/../classical-ml}:/fraud-detection/classical-ml
       - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
+      - ${OUTPUT_DIR}/data/node_edge_data:/workspace/data/node_edge_data
+      - ${OUTPUT_DIR}/xgb-training/models:/workspace/tmp/models
+      - ${OUTPUT_DIR}/xgb-training/logs:/workspace/tmp/logs
+      - ${WORKSPACE:-$PWD/../classical-ml}:/fraud-detection/classical-ml
       - $PWD/../wrapper.sh:/fraud-detection/wrapper.sh
     working_dir: /fraud-detection/classical-ml

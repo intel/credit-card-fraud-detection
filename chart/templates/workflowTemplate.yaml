@@ -14,7 +14,7 @@ spec:
                 - name: mode
                   value: preprocess
                 - name: workflow
-                  value: eap-fraud-detection-classical-ml
+                  value: beta-fraud-detection-classical-ml
           - name: gnn-analytics
             template: fraud-detection
             arguments:
@@ -22,7 +22,7 @@ spec:
                 - name: mode
                   value: gnn-analytics
                 - name: workflow
-                  value: eap-fraud-detection-gnn
+                  value: beta-fraud-detection-gnn
             dependencies:
               - preprocess
           - name: xgb-training
@@ -32,7 +32,7 @@ spec:
                 - name: mode
                   value: xgb-training
                 - name: workflow
-                  value: eap-fraud-detection-classical-ml
+                  value: beta-fraud-detection-classical-ml
             dependencies:
               - gnn-analytics
         failFast: true
@@ -66,16 +66,20 @@ spec:
           - name: dshm
             mountPath: /dev/shm
           - name: preprocess-output-dir
-            mountPath: /fraud-detection/data/edge_data
+            mountPath: /workspace/data/edge_data
+          - name: preprocess-output-dir
+            mountPath: /DATA_IN
           - name: gnn-output-dir
-            mountPath: /fraud-detection/data/node_edge_data
+            mountPath: /DATA_OUT
+          - name: gnn-output-dir
+            mountPath: /workspace/data/node_edge_data
         {{ if eq .Values.dataset.type "local" }}
           - name: dataset-dir
-            mountPath: /fraud-detection/data/raw_data
+            mountPath: /workspace/data/raw_data
         {{ end }}
         {{ if eq .Values.dataset.type "nfs" }}
           - name: dataset-dir
-            mountPath: /fraud-detection/data/raw_data
+            mountPath: /workspace/data/raw_data
             subPath: {{ .Values.dataset.nfs.subPath }}
         {{ end }}
         imagePullPolicy: Always
