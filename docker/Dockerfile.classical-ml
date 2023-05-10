@@ -1,3 +1,6 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 FROM ubuntu:22.04 as base
 
 # See http://bugs.python.org/issue19846
@@ -25,7 +28,7 @@ RUN python -m pip --no-cache-dir install --upgrade \
     setuptools
 
 RUN apt-get -y update && \
-    apt-get -y install --no-install-recommends ssh wget vim net-tools git-all htop && \
+    apt-get -y install --no-install-recommends openssh-server wget vim net-tools git-all htop && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # install java
@@ -62,13 +65,17 @@ RUN ssh-keygen -t rsa -f /root/.ssh/id_rsa -P '' && \
     sed -i 's/#   Port 22/Port 12345/' /etc/ssh/ssh_config && \
     sed -i 's/#Port 22/Port 12345/' /etc/ssh/sshd_config
 
-RUN pip install --no-cache-dir pyarrow findspark numpy pandas transformers pyrecdp scikit-learn category_encoders ray==2.2.0 xgboost xgboost-ray optuna sigopt pyyaml raydp
+RUN pip install --no-cache-dir pyarrow findspark numpy pandas transformers pyrecdp scikit-learn category_encoders ray[tune]==2.2.0 xgboost xgboost-ray optuna sigopt pyyaml raydp daal4py simplejson
 RUN pip install --no-cache-dir "modin[ray] @ git+https://github.com/dchigarev/modin@fraud_detection_target_enc"
+RUN pip install git+https://github.com/sllynn/spark-xgboost.git
 
 COPY ../classical-ml /fraud-detection/classical-ml
 COPY ../configs/single-node /workspace/configs
 COPY ../wrapper.sh /fraud-detection/wrapper.sh
 COPY ../third_party_programs.txt /licensing/third_party_programs.txt
+
+RUN wget -P /workspace/third_party https://repo1.maven.org/maven2/ml/dmlc/xgboost4j-spark_2.12/1.5.2/xgboost4j-spark_2.12-1.5.2.jar && \
+    wget -P /workspace/third_party https://repo1.maven.org/maven2/ml/dmlc/xgboost4j_2.12/1.5.2/xgboost4j_2.12-1.5.2.jar
 
 WORKDIR /fraud-detection/classical-ml
 

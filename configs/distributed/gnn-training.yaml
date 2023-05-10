@@ -1,0 +1,19 @@
+workflow_spec:
+  dataloader_params:
+    batch_size: 2048
+    batch_size_eval: 1000000
+    num_workers: 4
+  sampler_params:
+    fan_out: "55,65"
+    #sampling fan_out per GNN layer
+  model_params:
+    hidden_size: 64
+    num_layers: 2
+    learning_rate: 0.0005
+  training_params:
+    num_epochs: 10
+    eval_every: 1
+  dgl_params:
+    num_trainers: 1
+    num_samplers: 2
+    num_servers: 1

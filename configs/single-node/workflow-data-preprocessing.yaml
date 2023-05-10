@@ -1,6 +1,11 @@
 env:
   num_node: 1
-  node_ips: []
+  node_ips: 
+    - []
+  tmp_path: <path to ml_tmp folder>
+  data_path: <path to data folder>
+  config_path: <path to /fraud_detection/configs/single-node folder>
+  
 data_preprocess:
   input_data_path: raw_data
   input_data_format: csv

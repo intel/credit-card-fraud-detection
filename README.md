@@ -1,4 +1,3 @@
-
 # Enhanced Fraud Detection using Graph Neural Networks
 Boost fraud detection accuracy and developer efficiency through Intel's end-to-end, no-code, graph-neural-networks-boosted and multi-node distributed workflows.
 Check out more workflow examples and reference implementations in the [Developer Catalog](https://developer.intel.com/aireferenceimplementations).
@@ -14,6 +13,7 @@ Check out more workflow examples and reference implementations in the [Developer
 - [Set Up and Run Distributed Pipeline](#set-up-and-run-distributed-pipeline)
 - [Expected Output](#expected-output)
 - [Summary and Next Steps](#summary-and-next-steps)
+  - [Bring your own - dataset, preprocessing, GNN or XGB model](#customize-our-reference-kit-to-suit-your-usecase)
 - [Learn More](#learn-more)
 - [Support](#support)
 ## Overview
@@ -57,15 +57,16 @@ The GNN training stage creates homogenous graphs by consuming the processed data
 The XGBoost training stage trains a binary classification model using the data splitting, model parameters and runtime parameters set in the XGB training config yaml file. AUCPR (Area Under the Precision-Recall Curve) is used as the evaluation metric due to its robustness in evaluating highly imbalanced datasets. Data splitting is based on temporal sequence to simulate real-life scenario. The model performance on the tabformer dataset can be found in the table below.
 
 ## Getting Started
+Note : if you are using the distributed pipeline, please repeat steps 1, 2 and 3 on localdisk of all nodes as well as on NFS.
 ### 1. Set up the working directory 
 Create a working directory for the use case. Use these commands to set up the log folder, data folder and corresponding subfolders inside the working directory. We assume that your working directory is work. 
 ```bash
 export WORKDIR=$PWD/work
 mkdir work && cd work
-mkdir data && cd data
+mkdir data ml_tmp gnn_tmp
+cd data
 mkdir raw_data edge_data node_edge_data
 ```
-If you are using the distributed pipeline, please repeat this step on localdisk of all nodes and on NFS. 
 ### 2. Download the Dataset 
 How to get the tabformer dataset -
 1. Download the transactions.tgz from https://github.com/IBM/TabFormer/tree/main/data/credit_card
@@ -75,16 +76,15 @@ How to get the tabformer dataset -
 cd $WORKDIR/data/raw_data
 tar -zxvf transactions.tgz
 ```
-If you want to bring your own dataset, put your raw data in the `$WORKDIR/data/raw_data` folder. If you are using the distributed pipeline, please repeat this step on localdisk of all nodes and on NFS. 
+If you want to bring your own dataset, put your raw data in the `$WORKDIR/data/raw_data` folder.  
 ### 3. Download Fraud Detection Use Case Repository
 Clone the repository into your working directory. 
 ```bash
 cd $WORKDIR
-git clone https://github.com/intel/credit-card-fraud-detection # to be replaced by external git link
-cd credit-card-fraud-detection
+git clone https://github.com/intel/credit-card-fraud-detection
+cd fraud-detection-usecase
 git submodule update --init --recursive
 ```
-If you are using the distributed pipeline, please repeat this step on localdisk of master node and on NFS. 
 Your folder structure should follow the directory structure as shown in the figure below. 
 ![folder-structure](assets/folder_structure.jpg)
 ### Ways to run this reference use case
@@ -113,7 +113,8 @@ docker compose version
 ### 2. Setup Dataset
 Ensure you have downloaded the dataset as described in [Prepare data directory](#2-download-the-dataset) and set the path to the dataset as described below.
 ```bash
-export DATASET_DIR=<path-to-dataset>
+# pass the absolute path to /work/data folder
+export DATASET_DIR=<path-to-data-dir>
 ```
 ### 3. Set Up Docker Image
 You can choose to pull or build the containers that are going to be used to run the pipeline.
@@ -124,9 +125,10 @@ docker compose build
 OR
 ```bash
 cd docker
-docker pull intel/ai-workflows:eap-fraud-detection-classical-ml
-docker pull intel/ai-workflows:eap-fraud-detection-gnn
+docker pull intel/ai-workflows:beta-fraud-detection-classical-ml
+docker pull intel/ai-workflows:beta-fraud-detection-gnn
 ```
+Note : if you're running distributed pipeline, pull the classical-ml docker image on all nodes. 
 ### 4. Run single node pipeline
 #### Step 1: Run Feature Engineering to get edge features
 Run the preprocessing using the following command:
@@ -142,7 +144,22 @@ The table below shows some of the environment variables you can control accordin
 #### Step 2: Train and evaluate XGBoost baseline model with edge features only for fraud classification
 The preprocess pipeline must complete successfully before running the baseline training. The preprocess pipeline generates an output CSV file at `$OUTPUT_DIR/data/edge_data/`.
 The `baseline-training` workflow will consume the CSV file generated from `preprocess` above, and run a training of a XGBoost model. It will also print out AUCPR (area under the precision-recall curve) results to the console. 
-![baseline_topology](https://user-images.githubusercontent.com/18349036/226064639-c56a8d8b-c514-4a3e-ab72-a9903df7d9ff.png)
+
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+flowchart RL
+  VDATASETDIRrawdata{{"${DATASET_DIR}/raw_data"}} x-. /workspace/data/raw_data .-x preprocess
+  VOUTPUTDIRdataedgedata{{"${OUTPUT_DIR}/data/edge_data"}} x-. /workspace/data/edge_data .-x preprocess
+  VCONFIGDIR{{"${CONFIG_DIR"}} x-. "-$PWD/../configs/single-node}" .-x preprocess
+  VCONFIGDIR x-. "-$PWD/../configs/single-node}" .-x baselinetraining[baseline-training]
+  VOUTPUTDIRdataedgedata x-. /workspace/data/edge_data .-x baselinetraining
+  VOUTPUTDIRbaselinemodels{{"${OUTPUT_DIR}/baseline/models"}} x-. /workspace/tmp/models .-x baselinetraining
+  VOUTPUTDIRbaselinelogs{{"${OUTPUT_DIR}/baseline/logs"}} x-. /workspace/tmp/logs .-x baselinetraining
+
+  classDef volumes fill:#0f544e,stroke:#23968b
+  class VDATASETDIRrawdata,VOUTPUTDIRdataedgedata,VCONFIGDIR,VCONFIGDIR,VOUTPUTDIRdataedgedata,VOUTPUTDIRbaselinemodels,VOUTPUTDIRbaselinelogs volumes
+```
+
 Run the workflow container with the command below.
 ```bash
 docker compose run baseline-training 2>&1 | tee baseline-training.log
@@ -150,15 +167,42 @@ docker compose run baseline-training 2>&1 | tee baseline-training.log
 The table below shows some of the environment variables you can control according to your needs.
 | Environment Variable Name | Default Value | Description |
 | --- | --- | --- |
+| CONFIG_DIR | `$PWD/../configs/single-node` | Directory of the config file |
 | OUTPUT_DIR | `$PWD/output` | Output directory. Should be the same as set in [Step-2](#step-2-train-and-evaluate-xgboost-baseline-model-with-edge-features-only-for-fraud-classification)  |
 #### Step 3: Train and Evaluate XGBoost with both edge features and GNN generated node features for Fraud Classification
 To see the improvement over the baseline training you can run the xgb-training pipeline. Before running the baseline training, the preprocess pipeline must complete successfully. The preprocess pipeline generates an output CSV file at `$OUTPUT_DIR/data/edge_data/`. The `xgb-training` workflow consumes the CSV file generated from `preprocess` above, runs the `gnn-analytics` pipeline to generate optimized features, and runs a training of a XGBoost model using these features. It will also print out AUCPR (area under the precision-recall curve) results to the console.
-![stock_xgb_topology](https://user-images.githubusercontent.com/18349036/226065312-76bc9fb6-8a8d-4008-9245-26a1869492b6.png)
+
+Note : as this step runs GNN training first, we don't expect to see output for a while. Once GNN training finishes, we will start seeing output from XGBoost training. Instructions to check GNN log are provided in [logs section](#5-logs).
+
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+flowchart RL
+  VDATASETDIRrawdata{{"${DATASET_DIR}/raw_data"}} x-. /workspace/data/raw_data .-x preprocess
+  VOUTPUTDIRdataedgedata{{"${OUTPUT_DIR}/data/edge_data"}} x-. /workspace/data/edge_data .-x preprocess
+  VCONFIGDIR{{"${CONFIG_DIR"}} x-. "-$PWD/../configs/single-node}" .-x preprocess
+  VOUTPUTDIRdataedgedataprocesseddatatrimmedcsv{{"${OUTPUT_DIR}/data/edge_data/processed_data_trimmed.csv"}} x-. /DATA_IN/processed_data.csv .-x gnnanalytics[gnn-analytics]
+  VOUTPUTDIRdatanodeedgedata{{"${OUTPUT_DIR}/data/node_edge_data"}} x-. /DATA_OUT .-x gnnanalytics
+  VOUTPUTDIRgnncheckpoint{{"${OUTPUT_DIR}/gnn_checkpoint"}} x-. /GNN_TMP .-x gnnanalytics
+  VCONFIGDIR x-. "-$PWD/../configs/single-node}" .-x gnnanalytics
+  VOUTPUTDIRdatanodeedgedata x-. /workspace/data/node_edge_data .-x xgbtraining[xgb-training]
+  VOUTPUTDIRxgbtrainingmodels{{"${OUTPUT_DIR}/xgb-training/models"}} x-. /workspace/tmp/models .-x xgbtraining
+  VOUTPUTDIRxgbtraininglogs{{"${OUTPUT_DIR}/xgb-training/logs"}} x-. /workspace/tmp/logs .-x xgbtraining
+  VCONFIGDIR x-. "-$PWD/../configs/single-node}" .-x xgbtraining
+  xgbtraining --> gnnanalytics
+
+  classDef volumes fill:#0f544e,stroke:#23968b
+  class VDATASETDIRrawdata,VOUTPUTDIRdataedgedata,VCONFIGDIR,VOUTPUTDIRdataedgedataprocesseddatatrimmedcsv,VOUTPUTDIRdatanodeedgedata,VOUTPUTDIRgnncheckpoint,VCONFIGDIR,VOUTPUTDIRdatanodeedgedata,VOUTPUTDIRxgbtrainingmodels,VOUTPUTDIRxgbtraininglogs,VCONFIGDIR volumes
+```
+
 Run the workflow container with the command below.
 ```bash
 docker compose run xgb-training 2>&1 | tee xgb-training.log
 ```
 This command runs the `gnn-analytics` pipeline to generate the node features first and then uses edge features generated from [Step 2](#step-2-train-and-evaluate-xgboost-baseline-model-with-edge-features-only-for-fraud-classification) to train the XGBoost model and will print out AUCPR (area under the precision-recall curve) results to the console.
+
+Note : This steps runs the GNN training first which can take several hours to finish. 
+
+
 The table below shows some of the environment variables you can control according to your needs.
 | Environment Variable Name | Default Value | Description |
 | --- | --- | --- |
@@ -186,7 +230,7 @@ docker compose run dev-baseline-training
 | --- | --- | --- |
 | CONFIG_DIR | `$PWD/../configs/single-node` | Directory of the config file |
 | OUTPUT_DIR | `$PWD/output` | Dataset, Logfile and Checkpoint output. Should contain `${OUTPUT_DIR}/data/edge_data/processed_data.csv`  |
-| PARAMETER | `--baseline-training` | Script file parameter |
+| PARAMETER | `--baseline-training` | Script file parameter to control which pipeline to run from (--baseline-training/--gnn-analytics/--xgb-training) |
 | SCRIPT | `/fraud-detection/wrapper.sh` | Path of Script inside the container.|
 | WORKSPACE | `$PWD/../classical-ml` | Submodule Location of the classical-ml |
 ### Developer GNN Container
@@ -196,8 +240,9 @@ docker compose run dev-gnn-analytics
 ```
 | Environment Variable Name | Default Value | Description |
 | --- | --- | --- |
+| CONFIG_DIR | `$PWD/../configs/single-node` | Directory of the config file |
 | OUTPUT_DIR | `$PWD/output` | Dataset, Logfile and Checkpoint output. Should contain `${OUTPUT_DIR}/data/edge_data/processed_data.csv`  |
-| PARAMETER | `--gnn-analytics` | Script file parameter |
+| PARAMETER | `--gnn-analytics` | Script file parameter to control which pipeline to run from (--baseline-training/--gnn-analytics/--xgb-training) |
 | SCRIPT | `/fraud-detection/wrapper.sh` | Path of Script inside the container.|
 | WORKSPACE | `$PWD/../gnn-analytics` | Submodule Location of the gnn-workflow|
 ### Developer XGBoost Training Container
@@ -209,7 +254,7 @@ docker compose run dev-xgb-training
 | --- | --- | --- |
 | CONFIG_DIR | `$PWD/../configs/single-node` | Directory of the config file |
 | OUTPUT_DIR | `$PWD/output` | Dataset, Logfile and Checkpoint output. Should contain `${OUTPUT_DIR}/data/edge_data/processed_data.csv`  |
-| PARAMETER | `--xgb-training` | Script file parameter |
+| PARAMETER | `--xgb-training` | Script file parameter to control which pipeline to run from (--baseline-training/--gnn-analytics/--xgb-training) |
 | SCRIPT | `/fraud-detection/wrapper.sh` | Path of Script inside the container.|
 | WORKSPACE | `$PWD/../classical-ml` | Submodule Location of the classical-ml |
 ## Clean Up Docker Containers
@@ -244,7 +289,7 @@ docker run -a stdout ${DOCKER_RUN_ENVS} \
            -v ${WORKSPACE}:/fraud-detection/classical-ml \
            --privileged --init -it --rm --pull always \
            -w /fraud-detection/classical-ml \
-           intel/ai-workflows:eap-fraud-detection-classical-ml \
+           intel/ai-workflows:beta-fraud-detection-classical-ml \
            bash
 ```
 Run the command below for preprocessing and baseline training
@@ -275,33 +320,19 @@ To view your workflow progress
 argo logs @latest -f
 ```
 ## Set up and run distributed pipeline 
+### NOTE: Stay Tuned for the distributed pipeline in upcoming weeks!
 To run with Docker on single node, refer to [Run with Docker on single node](#set-up-and-run-single-node-pipeline-with-docker).
 ### 1. Requirements
 1. Password-less ssh needs to be set up on all the nodes that you are using. 
-2. GNN workflow requires the data directory and code repository to reside on Network File System (NFS). 
-3. Classical ML workflow requires code, configs and data directory to reside locally. 
+2. Classical ML workflow requires code, configs and data directory to reside locally.
+3. GNN workflow requires the data directory and code repository to reside on Network File System (NFS).
 4. The nodes should be connected with a high-speed network to enjoy speedups.
 ### 2. Set up distributed workflows
-#### Step 1: set up docker compose (on master node)
-Please set up docker compose using the instructions mentioned in section [Set up docker engine and docker compose](#1-set-up-docker-engine-and-docker-compose). 
+#### Step 1: set up docker compose and build/pull docker images (on all nodes)
+Please repeat step 1 through 3 in section [Set up and run single node pipeline with docker](#set-up-and-run-single-node-pipeline-with-docker) on all nodes. 
 
-#### Step 2: Set up distributed Classical ML workflow 
-Build the docker image on master node, and copy the same docker image `spark-image.tar` over to all the worker nodes. 
-```bash
-# on master node
-cd $WORKDIR/fraud-detection-usecase/docker
-docker compose build
-docker save -o <path/to/save>/spark-image.tar classical-ml-wf
-scp <path/to/save>/spark-image.tar <user_id>@<worker node ip>:<worker/node/path/to/save>/spark-image.tar
-```
-Then unpack the docker image on the worker node.  
-```bash
-# on worker node 
-docker load -i <worker/node/path/to/save>/spark-image.tar
-```
-#### Step 3: Setup distributed GNN workflow
-Please follow the instructions on [GNN workflow](https://github.com/intel/graph-neural-networks-and-analytics/eap-release#run-bare-metal-on-a-cluster-of-machines) GitHub repository to set up the distributed GNN workflow.
 ### 3. Run the Distributed Workflows
+We allow the users to bring their own dataset, create their own preprocessing engine, build custom graph dataset from processed csv files as well as construct their own XGBoost and GraphSage model. Please find more information in [Customize our reference kit to your own usecase](#customize-our-reference-kit-to-suit-your-usecase). 
 #### Step 1: Run distributed preprocessing
 1. Prepare the workflow config yaml (workflow-data-preprocessing.yaml) such that it reflects the number of nodes you wish to use and their IP addresses. </br>
 ```bash
@@ -311,17 +342,17 @@ env:
     - IP1
     - IP2
   # If you followed our setup instructions, you can get <path-to-work-dir> by running $WORKDIR in your terminal
-  tmp_path: <path-to-work-dir> 
-  data_path: <path-to-work-dir>/data
-  config_path: <path-to-work-dir>/fraud-detection-usecase/configs/distributed
+  tmp_path: <path-to-work-dir-on-localdisk>/ml_tmp  
+  data_path: <path-to-work-dir-on-localdisk>/data
+  config_path: <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed
 ``` 
 2. Pass the workflow config yaml to the Classical ML workflow container and launch the workflow container from master node with the command below. 
 ```bash
-# on master node in localdisk
-cd $WORKDIR/fraud-detection-usecase/classical-ml
-./start-workflow.sh $WORKDIR/fraud-detection-usecase/configs/distributed/workflow-data-preprocessing.yaml
+# on master node 
+cd <path-to-work-dir-on-localdisk>/fraud-detection-usecase/classical-ml
+./run-workflow.sh <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed/workflow-data-preprocessing.yaml
 ```
-The Classical ML workflow saves the processed data on the local disk of the master node.
+The Classical ML workflow saves the processed data inside `/work/data/edge_data` folder on the local disk of the master node.
 #### Step 2: Train distributed baseline model (edge features only)
 1. Prepare the workflow config yaml (workflow-baseline.yaml) that specifies the number of nodes and their IP addresses.  </br>
 ```bash
@@ -331,22 +362,54 @@ env:
     - IP1
     - IP2
   # If you followed our setup instructions, you can get <path-to-work-dir> by running $WORKDIR in your terminal
-  tmp_path: <path-to-work-dir> 
-  data_path: <path-to-work-dir>/data
-  config_path: <path-to-work-dir>/fraud-detection-usecase/configs/distributed
+  tmp_path: <path-to-work-dir-on-localdisk>/ml_tmp  
+  data_path: <path-to-work-dir-on-localdisk>/data
+  config_path: <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed
 ```
 2. Pass the workflow config yaml to the Classical ML workflow container and run the workflow container with the command below.
 ```bash
-# on master node in localdisk
-cd $WORKDIR/fraud-detection-usecase/classical-ml
-./start-workflow.sh $WORKDIR/fraud-detection-usecase/configs/distributed/workflow-baseline.yaml
+# on master node
+cd <path-to-work-dir-on-localdisk>/fraud-detection-usecase/classical-ml
+./run-workflow.sh <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed/workflow-baseline.yaml
 ```
 #### Step 3. Train distributed Graph Neural Network to get node features 
-Please refer to the [GNN workflow Run Bare Metal instructions](https://github.com/intel/graph-neural-networks-and-analytics/tree/v1.0-eap#run-bare-metal-on-a-cluster-of-machines). </br>
-Before running the distributed GNN workflow, copy the processed_data folder to the NFS.</br>
-After the distributed GNN workflow is completed, copy the the data file generated by the GNN workflow from NFS to the gnn_boosted_data folder on the master node for the final XGBoost model training with the Classical ML workflow.
+1. Copy the processed data from localdisk of master node to NFS. 
+```bash
+# on master node 
+scp <path-to-work-dir-on-localdisk>/data/edge_data/processed_data.csv <path-to-work-dir-on-NFS>/data/edge_data/
+```
+2. Prepare the workflow config yaml (workflow-gnn-training.yaml) by specifying the number of nodes and their IP addresses. 
+```bash
+env:
+  num_node: 2
+  node_ips: 
+    - IP1
+    - IP2
+  #tmp_path used to save model, embeddings, partitions...
+  tmp_path: <path-to-work-dir-on-NFS>/gnn_tmp
+  #data_path should contain processed_data.csv
+  data_path: <path-to-work-dir-on-NFS>/data/edge_data
+  #in_data_filename is the name of input csv file
+  in_data_filename: processed_data.csv
+  #out_path will contain the output csv with the tabular data and new node embeddings
+  out_path: <path-to-work-dir-on-NFS>/data/node_edge_data
+  #config_path will contain all three configs required by GNN workflow
+  config_path: <path-to-work-dir-on-NFS>/fraud-detection-usecase/configs/distributed
+```
+3. Pass the workflow config yaml to the Classical ML workflow container and run the workflow container with the command below.
+```bash
+# on master node
+cd <path-to-work-dir-on-NFS>/fraud-detection-usecase/gnn-analytics
+./run-workflow.sh <path-to-work-dir-on-NFS>/fraud-detection-usecase/configs/distributed/workflow-gnn-training.yaml
+```
+Distributed GNN workflow will save GNN-boosted features to `/work/data/node_edge_data/` folder on NFS. 
 #### Step 4. Distributed XGBoost training for fraud classification
-1. Prepare the workflow config yaml (workflow-xgb-training.yaml) that specifies the parameters for running the workflow for final XGBoost model training. </br>
+1. Copy GNN-boosted data from NFS to localdisk on master node. 
+```bash
+# on master node
+scp <path-to-work-dir-on-NFS>/data/node_edge_data/tabformer_with_gnn_emb.csv <path-to-work-dir-on-localdisk>/data/node_edge_data/
+```
+2. Prepare the workflow config yaml (workflow-xgb-training.yaml) that specifies the parameters for running the workflow for final XGBoost model training. </br>
 ```bash
 env:
   num_node: 2
@@ -354,15 +417,15 @@ env:
     - IP1
     - IP2
   # If you followed our setup instructions, you can get <path-to-work-dir> by running $WORKDIR in your terminal
-  tmp_path: <path-to-work-dir>  
-  data_path: <path-to-work-dir>/data
-  config_path: <path-to-work-dir>/fraud-detection-usecase/configs/distributed
+  tmp_path: <path-to-work-dir-in-localdisk>/ml_tmp 
+  data_path: <path-to-work-dir-in-localdisk>/data
+  config_path: <path-to-work-dir-in-localdisk>/fraud-detection-usecase/configs/distributed
 ```
-2. Pass the workflow config yaml to the Classical ML workflow container and run the workflow container with the command below.
+3. Pass the workflow config yaml to the Classical ML workflow container and run the workflow container with the command below.
 ```bash
 # on master node in localdisk
-cd $WORKDIR/fraud-detection-usecase/classical-ml
-./start-workflow.sh $WORKDIR/fraud-detection-usecase/configs/distributed/workflow-xgb-training.yaml
+cd <path-to-work-dir-in-localdisk>/fraud-detection-usecase/classical-ml
+./run-workflow.sh <path-to-work-dir-in-localdisk>/fraud-detection-usecase/configs/distributed/workflow-xgb-training.yaml
 ```
 ---
 ## Expected output 
@@ -372,16 +435,16 @@ We use Area Under the Precision Recall Curve (AUCPR) as evaluation metric (lies 
 You should expect to see a boost in AUCPR for test split by using GNN-boosted features. 
 | Data split                     | Number of examples   | AUCPR - Edge features only   | AUCPR - GNN-boosted features   |
 | :----------------------------: | :-----------------------: | :-------------------------: | :----------------------------: |
-|   Train (year < 2018)          |     20,604,847            |            0.95             |           0.99                 |
-|    Val (year = 2018)           |      1,689,822            |            0.88             |           0.88                 |
-|   Test (year > 2018)           |      1,904,167            |            0.79             |           0.83                 |
+|   Train (year < 2018)          |     20,604,847            |            0.92             |           0.98                 |
+|    Val (year = 2018)           |      1,689,822            |            0.91             |           0.93                 |
+|   Test (year > 2018)           |      1,904,167            |            0.88             |           0.94                 |
 #### Results for distributed pipeline
 You should expect to see a boost in AUCPR for test split by using GNN-boosted features. 
 | Data split                     | Number of examples   | AUCPR - Edge features only   | AUCPR - GNN-boosted features   |
 | :----------------------------: | :-----------------------: | :-------------------------: | :----------------------------: |
-|   Train (year < 2018)          |     20,604,847            |            0.95             |           0.99                 |
-|    Val (year = 2018)           |      1,689,822            |            0.87             |           0.87                 |
-|   Test (year > 2018)           |      1,904,167            |            0.82             |           0.86                 |
+|   Train (year < 2018)          |     20,604,847            |            0.95             |           0.96                 |
+|    Val (year = 2018)           |      1,689,822            |            0.90             |           0.95                 |
+|   Test (year > 2018)           |      1,904,167            |            0.88             |           0.94                 |
 ### 2: Expected output for single node pipeline 
 You will see logs that look similar to the ones below once you run the use case successfully. Please note that the timing numbers depend on the hardware systems.
 #### Expected output for single node preprocessing
@@ -390,83 +453,152 @@ Preprocessing dataset
 Failed to read model training configurations. This is either due to wrong parameters defined in the config file as shown: 'training'
 Or there is no need for model training.
 enter single-node mode...
-prepare env took 0.0 seconds
 reading data...
 (24386900, 15)
-dp read data took 43.0 seconds
 preparing data...
-dp prepare data took 5.0 seconds
 engineering features...
-dp engineer features took 120.4 seconds
 splitting data...
-dp split data took 4.8 seconds
 encoding features...
-dp encode features took 96.1 seconds
 saving data...
 data saved under the path /fraud-detection/data/edge_data/processed_data.csv
-dp save data took 259.1 seconds
-data preprocessing took 528.4 seconds
-The whole workflow processing took 528.4 seconds
 ```
-#### Expected output for single node baseline
+#### Expected output for single node baseline (with automated hyperparameter optimization)
+Our workflow runs hyperparameter optimization by default and prints the best trial's hyperparameters. 
 ```
-regenerate workflow tmp folders....
-Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess'
-Or there is no need for data preprocessing.
+Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess' or there is no need for data preprocessing.
+no need for training Failed to read end2end training configurations. This is either due to wrong parameters defined in the config file as shown: 'end2end_training' or there is no need for End-to-End training.
 enter single-node mode...
-prepare env took 0.0 seconds
+reading training data...
+reading without dropping columns...
+data has the shape (24198836, 26)
 start training models soon...
-read and prepare data for training...
 (24198836, 22)
-start xgboost model training...
-[0]     train-aucpr:0.30292     valid-aucpr:0.18852     test-aucpr:0.18230
-[100]   train-aucpr:0.75583     valid-aucpr:0.80220     test-aucpr:0.68338
-[200]   train-aucpr:0.84341     valid-aucpr:0.82412     test-aucpr:0.71389
-[300]   train-aucpr:0.86998     valid-aucpr:0.86242     test-aucpr:0.75954
-[400]   train-aucpr:0.88903     valid-aucpr:0.86131     test-aucpr:0.76025
-[500]   train-aucpr:0.90314     valid-aucpr:0.88119     test-aucpr:0.78382
-[600]   train-aucpr:0.91482     valid-aucpr:0.88324     test-aucpr:0.78819
-[700]   train-aucpr:0.92490     valid-aucpr:0.88226     test-aucpr:0.79116
-[800]   train-aucpr:0.93327     valid-aucpr:0.88355     test-aucpr:0.79309
-[900]   train-aucpr:0.94046     valid-aucpr:0.88276     test-aucpr:0.79143
-[999]   train-aucpr:0.94649     valid-aucpr:0.88188     test-aucpr:0.79205
-xgboost is saved.
-training took 4229.2 seconds
-The whole workflow processing took 4229.2 seconds
-```
-#### Expected output for single node GNN and XGB training
-```
-Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess'
-Or there is no need for data preprocessing.
-enter single-node mode...
-prepare env took 0.0 seconds
-start training models soon...
 read and prepare data for training...
-(24198836, 150)
-start xgboost model training...
-[0] train-aucpr:0.31415 valid-aucpr:0.11117 test-aucpr:0.09945
-[100] train-aucpr:0.81719 valid-aucpr:0.85195 test-aucpr:0.76542
-[200] train-aucpr:0.88523 valid-aucpr:0.86021 test-aucpr:0.79006
-[300] train-aucpr:0.92122 valid-aucpr:0.88141 test-aucpr:0.81731
-[400] train-aucpr:0.94534 valid-aucpr:0.89083 test-aucpr:0.82701
-[500] train-aucpr:0.96092 valid-aucpr:0.88692 test-aucpr:0.82644
-[600] train-aucpr:0.97157 valid-aucpr:0.88517 test-aucpr:0.82724
-[700] train-aucpr:0.97936 valid-aucpr:0.88205 test-aucpr:0.82191
-[800] train-aucpr:0.98486 valid-aucpr:0.88132 test-aucpr:0.82018
-[900] train-aucpr:0.98910 valid-aucpr:0.87862 test-aucpr:0.81839
-[999] train-aucpr:0.99258 valid-aucpr:0.88680 test-aucpr:0.82811
-xgboost is saved.
-training took 8308.5 seconds
-The whole workflow processing took 8308.5 seconds
+start xgboost HPO...
+  0%|          | 0/10 [00:00<?, ?it/s][0]       train-aucpr:0.39670     eval-aucpr:0.26043      test-aucpr:0.26432
+[999]   train-aucpr:0.98697     eval-aucpr:0.87243      test-aucpr:0.81485
+Best trial: 0. Best value: 0.872425:  10%|â–ˆ         | 1/10 [22:23<3:21:33, 1343.71s/it][I 2023-04-26 23:19:42,948] Trial 0 finished with value: 0.8724252645144079 and parameters: {'eta': 0.15, 'max_depth': 7, 'subsample': 0.5580179751710447, 'colsample_bytree': 0.8829791679963901, 'lambda': 0.6988028968743126, 'alpha': 0.9281407432733514, 'min_child_weight': 2}. Best is trial 0 with value: 0.8724252645144079.
+...
+[0]     train-aucpr:0.20233     eval-aucpr:0.11631      test-aucpr:0.11132
+[999]   train-aucpr:0.93912     eval-aucpr:0.88756      test-aucpr:0.81800
+Best trial: 7. Best value: 0.91189: 100%| 10/10 [3:32:04<00:00, 1272.49s/it]
+Trial 9 finished with value: 0.8875619161413042 and parameters: {'eta': 0.17, 'max_depth': 5, 'subsample': 0.8748137912212397, 'colsample_bytree': 0.9733703420536219, 'lambda': 0.565297835149586, 'alpha': 0.43564481669099264, 'min_child_weight': 2}. 
+Best is trial 7 with value: 0.9118896651018639.
+  Value: 0.9118896651018639
+  Params:
+    eta: 0.1
+    max_depth: 9
+    subsample: 0.6372646065696512
+    colsample_bytree: 0.5940969469756718
+    lambda: 0.023810403412340413
+    alpha: 0.4955030354495986
+    min_child_weight: 9
+aucpr of the best configs on test set is 0.8779567630966963
 ```
+#### Expected output for single node baseline (with best hyperparameters)
+We saved our best model's hyper-parameters in `$WORKDIR/fraud-detection-usecase/configs/single-node/baseline-xgb-training.yaml`. Simply comment `hpo_spec` section and uncomment `model_spec` section to reproduce our results. 
+```
+Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess' or there is no need for data preprocessing.
+no need for HPO
+Failed to read end2end training configurations. This is either due to wrong parameters defined in the config file as shown: 'end2end_training' or there is no need for End-to-End training.
+enter single-node mode...
+reading training data...
+reading without dropping columns...
+data has the shape (24198836, 26)
+start training models soon...
+(24198836, 22)
+read and prepare data for training...
+start xgboost model training...
+[0]     train-aucpr:0.41938     eval-aucpr:0.41885      test-aucpr:0.36533
+[100]   train-aucpr:0.78485     eval-aucpr:0.90691      test-aucpr:0.89396
+[200]   train-aucpr:0.81402     eval-aucpr:0.92188      test-aucpr:0.89991
+[300]   train-aucpr:0.84193     eval-aucpr:0.92164      test-aucpr:0.89123
+[400]   train-aucpr:0.86475     eval-aucpr:0.91879      test-aucpr:0.88308
+[500]   train-aucpr:0.87911     eval-aucpr:0.91601      test-aucpr:0.87810
+[600]   train-aucpr:0.88980     eval-aucpr:0.91699      test-aucpr:0.87880
+[700]   train-aucpr:0.89974     eval-aucpr:0.91588      test-aucpr:0.88025
+[800]   train-aucpr:0.90777     eval-aucpr:0.91510      test-aucpr:0.87856
+[900]   train-aucpr:0.91517     eval-aucpr:0.91347      test-aucpr:0.87711
+[999]   train-aucpr:0.92204     eval-aucpr:0.91267      test-aucpr:0.87582
+start xgboost model testing...
+testing results: aucpr on test set is 0.8758093307052992
+xgboost model is saved under /workspace/tmp/models.
+```
+#### Expected output for single node GNN and XGB training (with automated hyperparameter optimization)
+Our workflow runs hyperparameter optimization by default and prints the best trial's hyperparameters. 
+```
+Creating Container docker-gnn-analytics-1
+Created Container docker-gnn-analytics-1
+Starting Container docker-gnn-analytics-1
 
+Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess' or there is no need for data preprocessing.
+no need for training Failed to read end2end training configurations. This is either due to wrong parameters defined in the config file as shown: 'end2end_training' or there is no need for End-to-End training.
+enter single-node mode...
+reading training data...
+reading without dropping columns...
+data has the shape (24198836, 154)
+start training models soon...
+(24198836, 150)
+read and prepare data for training...
+start xgboost HPO...
+[0] train-aucpr:0.19283 eval-aucpr:0.03559 test-aucpr:0.02577
+[999] train-aucpr:0.94984 eval-aucpr:0.89502 test-aucpr:0.86376
+Best trial: 0. Best value: 0.89502: 10%|â–ˆ | 1/10 [17:27<2:37:05, 1047.28s/it][I 2023-04-27 21:51:02,449] Trial 0 finished with value: 0.8950199939942034 and parameters: {'eta': 0.2, 'max_depth': 4, 'subsample': 0.581804256586296, 'colsample_bytree': 0.3397014497235425, 'lambda': 0.4620219935728601, 'alpha': 0.8976349208109945, 'min_child_weight': 3}. Best is trial 0 with value: 0.8950199939942034.
+...
+Best trial: 5. Best value: 0.930132: 100%| 10/10 [2:48:54<00:00, 1013.50s/it]
+[I 2023-04-28 00:22:30,154] Trial 9 finished with value: 0.9054094235120606 and parameters: {'eta': 0.1, 'max_depth': 5, 'subsample': 0.9740220576298498, 'colsample_bytree': 0.5915481518062535, 'lambda': 0.7854898534100563, 'alpha': 0.6962425381327314, 'min_child_weight': 3}.
+Best is trial 5 with value: 0.930131689676218.
+Value: 0.930131689676218
+Params:
+eta: 0.01
+max_depth: 6
+subsample: 0.8714669008983891
+colsample_bytree: 0.8825897760478416
+lambda: 0.4397103901613584
+alpha: 0.8475402634335466
+min_child_weight: 8
+aucpr of the best configs on test set is 0.9224617296126916
+```
+#### Expected output for single node GNN and XGB training (with best hyperparameters)
+We saved our best model's hyper-parameters in `$WORKDIR/fraud-detection-usecase/configs/single-node/xgb-training.yaml`. Simply comment `hpo_spec` section and uncomment `model_spec` section to reproduce our results. 
+```
+Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess' or there is no need for data preprocessing.
+no need for HPO
+Failed to read end2end training configurations. This is either due to wrong parameters defined in the config file as shown: 'end2end_training' or there is no need for End-to-End training.
+enter single-node mode...
+reading training data...
+reading without dropping columns...
+data has the shape (24198836, 154)
+start training models soon...
+(24198836, 150)
+read and prepare data for training...
+start xgboost model training...
+[0]     train-aucpr:0.48145     eval-aucpr:0.23717      test-aucpr:0.21672
+[100]   train-aucpr:0.80701     eval-aucpr:0.84678      test-aucpr:0.83616
+[200]   train-aucpr:0.85851     eval-aucpr:0.93348      test-aucpr:0.95080
+[300]   train-aucpr:0.88907     eval-aucpr:0.93487      test-aucpr:0.95312
+[400]   train-aucpr:0.91095     eval-aucpr:0.93121      test-aucpr:0.95203
+[500]   train-aucpr:0.92976     eval-aucpr:0.93077      test-aucpr:0.95142
+[600]   train-aucpr:0.94440     eval-aucpr:0.92910      test-aucpr:0.94902
+[700]   train-aucpr:0.95611     eval-aucpr:0.92940      test-aucpr:0.94795
+[800]   train-aucpr:0.96405     eval-aucpr:0.92913      test-aucpr:0.94606
+[900]   train-aucpr:0.97143     eval-aucpr:0.92884      test-aucpr:0.94424
+[999]   train-aucpr:0.97721     eval-aucpr:0.92824      test-aucpr:0.94275
+start xgboost model testing...
+testing results: aucpr on test set is 0.9427465838947949
+xgboost model is saved under /workspace/tmp/models.
+```
 ---
 ## Summary and next steps
-The steps above demonstrate accuracy boost through using GNN's and efficiency boost through setting up distributed pipelines as well as a no-code user experience through configs. To experiment further with Intel's enhanced fraud detection reference use case, you can - 
+The steps above demonstrate accuracy boost through using GNN's and efficiency boost through setting up distributed pipelines as well as a no-code user experience through configs. 
+### Customize our reference kit to suit your usecase
+To customize our reference kit to support your needs, you can - 
 1. Bring your own dataset: You can add your own source data to `/data/raw_data`. 
 2. Bring your own preprocessor : You can create your own preprocessor (i.e. edge featurizer) by editing `data-preprocessing.yaml`. More information on how to write config yaml file can be found in the [Classical ML workflow](https://github.com/intel/recommender-system-with-distributed-classical-ml) GitHub repository.
 3. Bring your own baseline : You can set parameters of your baseline model such as learning_rate, eval_metric, num_boost_round, verbose_eval and so on in `baseline-xgb-training.yaml`. 
-4. Bring your own XGB model : You can set parameters of your final XGB model such as learning_rate, eval_metric, num_boost_round, verbose_eval and so on in `xgb-training.yaml` if you want to edit final XGB model. 
+4. Bring your own Graph: You can create your own graph by defining node columns and edge types in `tabular2graph.yaml`.
+5. Bring your own GNN : You can set parameters of your GraphSage model such as learning_rate, fan_out, epochs, eval_every and so on in `gnn-training.yaml`.
+6. Bring your own XGB model : You can set parameters of your final XGB model such as learning_rate, eval_metric, num_boost_round, verbose_eval and so on in `xgb-training.yaml` if you want to edit final XGB model. </br>
 Make sure to edit your configs in `/configs/single-node` folder if you're using single-node setting and `/configs/distributed` if you're using distributed setting. 
 ---
 ## Learn more

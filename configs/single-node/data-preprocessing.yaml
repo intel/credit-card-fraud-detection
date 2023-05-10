@@ -1,23 +1,9 @@
-data_preparation:
-  - normalize_feature_names:
+pre_splitting_transformation:
+  - normalize_feature_names: 
     - replace_chars: {' ': '_'}
     - lowercase: True
-  # - rename_feature_names:
-  # - drop_features:
-  # - outlier_treatment:
-  - adjust_datatype:
-      merchant_city: category
-      merchant_state: category
-      mcc: category
-      zip: str
-      zip: category
-
-
-# data_cleaning:
-
-feature_engineering:
   - categorify:
-      merchant_name: merchant_id
+      merchant_name: merchant_id 
       is_fraud?: is_fraud?
   - strip_chars:
       amount: {'amount':'$'}
@@ -26,21 +12,25 @@ feature_engineering:
   - time_to_seconds:
       time: time
   - change_datatype:
+      merchant_city: category
+      merchant_state: category
+      mcc: category 
+      zip: ['str','category']
       amount: float32
-      time: uint8
+      time: uint8 
       card_id: float32
   - min_max_normalization:
-      time: time
+      time: time 
   - one_hot_encoding:
-      use_chip: True
+      use_chip: True 
   - string_to_list:
       errors?: {'errors?': ','}
   - multi_hot_encoding:
-      errors?: True
+      errors?: True 
   - add_constant_feature:
       split: 0
   - modify_on_conditions:
-      split:
+      split: 
         'df.year == 2018': 1
         'df.year > 2018': 2
   - define_variable:
@@ -50,23 +40,16 @@ feature_engineering:
       split:
         '(df["split"] != 0) & ~df["card_id"].isin(tmp["train_card_ids"])': 3
         '(df["split"] != 0) & ~df["merchant_id"].isin(tmp["train_merch_ids"])': 3
-
+    
 data_splitting:
     custom_rules:
         train: 'df["split"] == 0'
         test: '(df["split"] == 1) | (df["split"] == 2)'
     # random_split:
     #     test_ratio: 0.1
-
-feature_encoding:
-    - target_encoding:
+        
+post_splitting_transformation: 
+    - target_encoding: 
         target_col: is_fraud?
         feature_cols: ["merchant_city", "merchant_state", "zip", "mcc"]
         smoothing: 0.001
-    - label_encoding:
-        feature_cols: ['is_fraud?']
-
-
-# last_mile_processing:
-#   drop_features:
-#   drop_rows:

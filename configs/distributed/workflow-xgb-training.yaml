@@ -3,17 +3,19 @@ env:
   node_ips: #the first item in the ip list is the master ip, pls make sure that the ip doesn't contain space in the end
   #  - IP1
   #  - IP2
-  tmp_path: <path to work dir>
-  data_path: <path to work/data dir>
-  config_path: <path to work/fraud-detection-usecase/configs/distributed dir>
+    
+  tmp_path: <path-to-work-dir-on-localdisk>/ml_tmp
+  data_path: <path-to-work-dir-on-localdisk>/data
+  config_path: <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed
 
 training:
   input_data_path: node_edge_data
   input_data_format: csv
   train_config_file: xgb-training.yaml
   train_framework: pandas
+  test_backend: xgboost-native
   ray_params:
-    num_actors: 10
+    num_actors: 5
     cpus_per_actor: 15
     elastic_training: True
     max_failed_actors: 4

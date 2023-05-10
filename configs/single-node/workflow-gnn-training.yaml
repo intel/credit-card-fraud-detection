@@ -1,0 +1,47 @@
+env:
+  num_node: 1
+  node_ips: 
+    - []
+
+  #tmp_path used to save model, embeddings, partitions...
+  tmp_path: <path to gnn_tmp folder>
+  #data_path should contain processed_data.csv
+  data_path: <path to data/edge_data folder>
+  #in_data_filename is the name of input csv file
+  in_data_filename: processed_data.csv
+  #out_path will contain the output csv with the tabular data and new node embeddings
+  out_path: <path to data/node_edge_data folder>
+  #config_path will contain all three configs required by GNN workflow
+  config_path: <path to fraud-detection-usecase/configs/single-node folder>
+
+  #for single node docker exec paths need to be on /localdisk (or NFS with full permissions)
+  #for distributed exec paths need to be on NFS along with code repo
+  bare_metal: True
+  #bare_metal=False means run using docker container
+  train_config_file: gnn-training.yaml
+  tabular2graph_config_file: tabular2graph.yaml
+
+#first time run all stages but later you can set stages to False to run with prior results
+#i.e skip building graph and partitions to save time and jump directly to training
+single:
+  build_graph: True
+  #build_graph stage generates CSVDataset files for DGL to ingest data as graph
+  gnn_training: True
+  map_save: True
+  #map_save stage performs the mapping of the computed node embeddings to the input tabular data file
+
+distributed:
+  build_graph: True
+  partition_graph: True
+  #partition_graph stages uses random partition algorithm to generate "num_parts" subgraphs for distributed training
+  gnn_training: True
+  map_save: True
+  num_parts: 2
+  #during training num_parts should match the env_num_nodes. If running partitioning stage by itself you can modify the number
+  #(i,e if you want to do multiple graph pre-partitioning before starting the training runs)
+  
+graph:
+  #provide a name for the graph
+  CSVDataset_name: sym_tabformer_hetero_CSVDatasets
+  name: tabformer_full_homo
+
