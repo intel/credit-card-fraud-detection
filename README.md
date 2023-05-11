@@ -1,3 +1,5 @@
+# NOTE: This is an old version of the pipeline moved from [this repo](https://github.com/oneapi-src/credit-card-fraud-detection)
+
 # **Fraud Detection using an ensemble technique - Intel optimized DBSCAN clustering followed by Light Gradient Boosted Model (LGBM)**
 
 Credit card transactions can be stratified using DBSCAN clustering. The stratified data then can be used to train an LGBM model to identify fraudulent transactions. The Intel AI Analytics Toolkit (AI Kit) gives data scientists, AI developers, and researchers familiar Python tools and frameworks to accelerate end-to-end data science and analytics pipelines on Intel architectures. The components are built using oneAPI libraries for low-level compute optimizations.We will use the The Intel Extension for Scikit-learn and daal4py to accelerate the clustering and inference stages of this solution.
