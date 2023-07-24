@@ -2,7 +2,7 @@ env:
   num_node: 1
   node_ips: 
     - []
-
+  ssh_port: 12347 #bare-metal is 22; docker is 12347
   #tmp_path used to save model, embeddings, partitions...
   tmp_path: <path to gnn_tmp folder>
   #data_path should contain processed_data.csv
@@ -16,7 +16,8 @@ env:
 
   #for single node docker exec paths need to be on /localdisk (or NFS with full permissions)
   #for distributed exec paths need to be on NFS along with code repo
-  bare_metal: True
+  bare_metal: False
+  docker_image: gnn-wf
   #bare_metal=False means run using docker container
   train_config_file: gnn-training.yaml
   tabular2graph_config_file: tabular2graph.yaml

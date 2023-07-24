@@ -1,34 +1,10 @@
 # Copyright (C) 2022 Intel Corporation
 # SPDX-License-Identifier: BSD-3-Clause
 
-FROM ubuntu:22.04 as base
+FROM intel/intel-optimized-ml:scikit-learn-2023.1.1-xgboost-1.7.5-pip-base as base
 
-# See http://bugs.python.org/issue19846
-ENV LANG C.UTF-8
-
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Etc/UTC
-
-RUN apt-get update && apt-get install -y --no-install-recommends --fix-missing \
-    ca-certificates \
-    curl \
-    python3 \
-    python3-distutils \
-    python3-dev \
-    build-essential
-
-RUN curl -fSsL https://bootstrap.pypa.io/get-pip.py | python3
-
-RUN ln -sf $(which python3) /usr/local/bin/python && \
-    ln -sf $(which python3) /usr/local/bin/python3 && \
-    ln -sf $(which python3) /usr/bin/python
-
-RUN python -m pip --no-cache-dir install --upgrade \
-    pip \
-    setuptools
-
-RUN apt-get -y update && \
-    apt-get -y install --no-install-recommends openssh-server wget vim net-tools git-all htop && \
+RUN apt-get -y update && apt-get -y upgrade && \
+    apt-get -y install --no-install-recommends openssh-server wget vim net-tools git-all htop python3-dev build-essential && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # install java
@@ -65,9 +41,9 @@ RUN ssh-keygen -t rsa -f /root/.ssh/id_rsa -P '' && \
     sed -i 's/#   Port 22/Port 12345/' /etc/ssh/ssh_config && \
     sed -i 's/#Port 22/Port 12345/' /etc/ssh/sshd_config
 
-RUN pip install --no-cache-dir pyarrow findspark numpy pandas transformers pyrecdp scikit-learn category_encoders ray[tune]==2.2.0 xgboost xgboost-ray optuna sigopt pyyaml raydp daal4py simplejson
-RUN pip install --no-cache-dir "modin[ray] @ git+https://github.com/dchigarev/modin@fraud_detection_target_enc"
-RUN pip install git+https://github.com/sllynn/spark-xgboost.git
+##Install packages
+COPY ../classical-ml/requirements.txt requirements.txt
+RUN pip install -r requirements.txt && rm -rf requirements.txt
 
 COPY ../classical-ml /fraud-detection/classical-ml
 COPY ../configs/single-node /workspace/configs
