@@ -75,12 +75,12 @@ cd data && mkdir raw_data edge_data node_edge_data
 ```
 ### Download the Workflow Repository
 Create a working directory for the workflow and clone the [Main
-Repository](https://github.com/intel-sandbox/fraud-detection-usecase) into your working
+Repository](https://github.com/intel/credit-card-fraud-detection) into your working
 directory.
 ```bash
 cd ${WORKSPACE}
-git clone https://github.com/intel-sandbox/fraud-detection-usecase
-cd fraud-detection-usecase
+git clone https://github.com/intel/credit-card-fraud-detection
+cd credit-card-fraud-detection
 git submodule update --init --recursive
 ```
 Your folder structure should follow the directory structure as shown in the figure below. 
@@ -121,12 +121,12 @@ docker compose version
 #### Set Up Docker Image
 Build or pull the provided docker image.
 ```bash
-cd $WORKSPACE/fraud-detection-usecase/docker
+cd $WORKSPACE/credit-card-fraud-detection/docker
 docker compose build
 ```
 OR
 ```bash
-cd $WORKSPACE/fraud-detection-usecase/docker
+cd $WORKSPACE/credit-card-fraud-detection/docker
 docker pull intel/ai-workflows:pa-fraud-detection-classical-ml
 docker pull intel/ai-workflows:pa-fraud-detection-gnn
 ```
@@ -152,8 +152,8 @@ The table below shows some of the environment variables you can control accordin
 
 | Environment Variable Name | Default Value | Description |
 | --- | --- | --- |
-| CONFIG_DIR | `${WORKSPACE}/fraud-detection-usecase/configs`       | Configurations directory |
-| OUTPUT_DIR | `${WORKSPACE}/fraud-detection-usecase/docker/output` | Logfile and Checkpoint output |
+| CONFIG_DIR | `${WORKSPACE}/credit-card-fraud-detection/configs`       | Configurations directory |
+| OUTPUT_DIR | `${WORKSPACE}/credit-card-fraud-detection/docker/output` | Logfile and Checkpoint output |
 
 ##### Train and evaluate XGBoost model with edge features only
 ```mermaid
@@ -179,8 +179,8 @@ The table below shows some of the environment variables you can control accordin
 
 | Environment Variable Name | Default Value | Description |
 | --- | --- | --- |
-| CONFIG_DIR | `${WORKSPACE}/fraud-detection-usecase/configs`       | Configurations directory |
-| OUTPUT_DIR | `${WORKSPACE}/fraud-detection-usecase/docker/output` | Logfile and Checkpoint output |
+| CONFIG_DIR | `${WORKSPACE}/credit-card-fraud-detection/configs`       | Configurations directory |
+| OUTPUT_DIR | `${WORKSPACE}/credit-card-fraud-detection/docker/output` | Logfile and Checkpoint output |
 #### Train and Evaluate XGBoost with both edge features and GNN generated node features
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
@@ -219,8 +219,8 @@ The table below shows some of the environment variables you can control accordin
 
 | Environment Variable Name | Default Value | Description |
 | --- | --- | --- |
-| CONFIG_DIR | `${WORKSPACE}/fraud-detection-usecase/configs`       | Configurations directory |
-| OUTPUT_DIR | `${WORKSPACE}/fraud-detection-usecase/docker/output` | Logfile and Checkpoint output |
+| CONFIG_DIR | `${WORKSPACE}/credit-card-fraud-detection/configs`       | Configurations directory |
+| OUTPUT_DIR | `${WORKSPACE}/credit-card-fraud-detection/docker/output` | Logfile and Checkpoint output |
 #### View Logs
 Run these commands to check the `preprocess`, `baseline-training`, and `xgb-training` logs:
 ```bash
@@ -318,7 +318,7 @@ export DATASET_DIR=${LOCAL_DIR}/data
 ###### Step 3: build docker images using docker compose (on master node)
 ```bash
 # on master node
-cd ${LOCAL_DIR}/fraud-detection-usecase/docker
+cd ${LOCAL_DIR}/credit-card-fraud-detection/docker
 docker compose build
 ```
 ###### Step 4: compress docker image for classical ML workflow (on master node)
@@ -343,7 +343,7 @@ docker load -i ${LOCAL_DIR}/wf-image.tar
 #### Run the Distributed Workflows
 We allow the users to bring their own dataset, create their own preprocessing engine, build custom graph dataset from processed csv files as well as construct their own XGBoost and GraphSage model. Please find more information in [How to customize this use case](#how-to-customize-this-use-case). 
 ##### Step 1: Run distributed preprocessing (on localdisk)
-1. On master node, prepare `${LOCAL_DIR}/fraud-detection-usecase/configs/distributed/workflow-data-preprocessing.yaml` to reflect desired IP addresses and absolute path to ${LOCAL_DIR}. </br>
+1. On master node, prepare `${LOCAL_DIR}/credit-card-fraud-detection/configs/distributed/workflow-data-preprocessing.yaml` to reflect desired IP addresses and absolute path to ${LOCAL_DIR}. </br>
 ```bash
 env:
   num_node: 2
@@ -353,17 +353,17 @@ env:
   # NOTE : please provide absolute path to ${LOCAL_DIR}
   tmp_path: <path-to-work-dir-on-localdisk>/ml_tmp  
   data_path: <path-to-work-dir-on-localdisk>/data
-  config_path: <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed
+  config_path: <path-to-work-dir-on-localdisk>/credit-card-fraud-detection/configs/distributed
 ``` 
 2. Pass the workflow config yaml to the Classical ML workflow container and launch the workflow container from master node with the command below. 
 ```bash
 # on master node 
-cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
-./run-workflow.sh ${LOCAL_DIR}/fraud-detection-usecase/configs/distributed/workflow-data-preprocessing.yaml
+cd ${LOCAL_DIR}/credit-card-fraud-detection/classical-ml
+./run-workflow.sh ${LOCAL_DIR}/credit-card-fraud-detection/configs/distributed/workflow-data-preprocessing.yaml
 ```
 The Classical ML workflow saves the processed data inside `${LOCAL_DIR}/data/edge_data` folder on the local disk of the master node. After a successful run, `${LOCAL_DIR}/data/edge_data/processed_data.csv` should have (24198836, 26) shape. 
 ##### Step 2: Train distributed baseline model - edge features only (on localdisk)
-1. On master node, prepare `${LOCAL_DIR}/fraud-detection-usecase/configs/distributed/workflow-baseline.yaml` to reflect desired IP addresses and absolute path to ${LOCAL_DIR}. </br>
+1. On master node, prepare `${LOCAL_DIR}/credit-card-fraud-detection/configs/distributed/workflow-baseline.yaml` to reflect desired IP addresses and absolute path to ${LOCAL_DIR}. </br>
 ```bash
 env:
   num_node: 2
@@ -373,13 +373,13 @@ env:
   # NOTE : please provide absolute path to ${LOCAL_DIR}
   tmp_path: <path-to-work-dir-on-localdisk>/ml_tmp  
   data_path: <path-to-work-dir-on-localdisk>/data
-  config_path: <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed
+  config_path: <path-to-work-dir-on-localdisk>/credit-card-fraud-detection/configs/distributed
 ```
 2. Pass the workflow config yaml to the Classical ML workflow container and run the workflow container with the command below.
 ```bash
 # on master node
-cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
-./run-workflow.sh ${LOCAL_DIR}/fraud-detection-usecase/configs/distributed/workflow-baseline.yaml
+cd ${LOCAL_DIR}/credit-card-fraud-detection/classical-ml
+./run-workflow.sh ${LOCAL_DIR}/credit-card-fraud-detection/configs/distributed/workflow-baseline.yaml
 ```
 ##### Step 3. Train distributed Graph Neural Network to get node features (on NFS)
 1. Copy the processed data from localdisk of master node to NFS. 
@@ -387,7 +387,7 @@ cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
     # on master node 
     scp ${LOCAL_DIR}/data/edge_data/processed_data.csv ${NFS_DIR}/data/edge_data/
     ```
-2. On master node, prepare `${NFS_DIR}/fraud-detection-usecase/configs/distributed/workflow-gnn-training.yaml` to reflect desired IP addresses and absolute path to ${NFS_DIR}. </br>
+2. On master node, prepare `${NFS_DIR}/credit-card-fraud-detection/configs/distributed/workflow-gnn-training.yaml` to reflect desired IP addresses and absolute path to ${NFS_DIR}. </br>
     ```bash
     env:
       num_node: 2
@@ -404,13 +404,13 @@ cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
       # out_path will contain the output csv with the tabular data and new node embeddings
       out_path: <path-to-work-dir-on-NFS>/data/node_edge_data
       #config_path will contain all three configs required by GNN workflow
-      config_path: <path-to-work-dir-on-NFS>/fraud-detection-usecase/configs/distributed
+      config_path: <path-to-work-dir-on-NFS>/credit-card-fraud-detection/configs/distributed
     ```
 3. Pass the workflow config yaml to the GNN workflow container and run the workflow container with the command below.
     ```bash
     # on master node
-    cd ${NFS_DIR}/fraud-detection-usecase/gnn-analytics
-    ./run-workflow.sh ${NFS_DIR}/fraud-detection-usecase/configs/distributed/workflow-gnn-training.yaml
+    cd ${NFS_DIR}/credit-card-fraud-detection/gnn-analytics
+    ./run-workflow.sh ${NFS_DIR}/credit-card-fraud-detection/configs/distributed/workflow-gnn-training.yaml
     ```
 
     Distributed GNN workflow will save GNN-boosted features to `${NFS_DIR}/data/node_edge_data/` folder on NFS. After a successful run, `${NFS_DIR}/data/node_edge_data/tabular_with_gnn_emb.csv` should have (24198836, 154) shape. Else, please try following troubleshooting steps.  
@@ -422,7 +422,7 @@ cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
     # on master node
     scp ${NFS_DIR}/data/node_edge_data/tabular_with_gnn_emb.csv ${LOCAL_DIR}/data/node_edge_data/
     ```
-2. On master node, prepare `${LOCAL_DIR}/fraud-detection-usecase/configs/distributed/workflow-xgb-training.yaml` to reflect desired IP addresses and absolute path to work dir on localdisk. </br>
+2. On master node, prepare `${LOCAL_DIR}/credit-card-fraud-detection/configs/distributed/workflow-xgb-training.yaml` to reflect desired IP addresses and absolute path to work dir on localdisk. </br>
     ```bash
     env:
       num_node: 2
@@ -432,13 +432,13 @@ cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
       # NOTE : please provide absolute path to work dir on localdisk
       tmp_path: <path-to-work-dir-in-localdisk>/ml_tmp 
       data_path: <path-to-work-dir-in-localdisk>/data
-      config_path: <path-to-work-dir-in-localdisk>/fraud-detection-usecase/configs/distributed
+      config_path: <path-to-work-dir-in-localdisk>/credit-card-fraud-detection/configs/distributed
     ```
 3. Pass the workflow config yaml to the Classical ML workflow container and run the workflow container with the command below.
     ```bash
     # on master node in localdisk
-    cd ${LOCAL_DIR}/fraud-detection-usecase/classical-ml
-    ./run-workflow.sh ${LOCAL_DIR}/fraud-detection-usecase/configs/distributed/workflow-xgb-training.yaml
+    cd ${LOCAL_DIR}/credit-card-fraud-detection/classical-ml
+    ./run-workflow.sh ${LOCAL_DIR}/credit-card-fraud-detection/configs/distributed/workflow-xgb-training.yaml
     ```
 ---
 ### Expected output 
@@ -512,7 +512,7 @@ Best is trial 7 with value: 0.9118896651018639.
 aucpr of the best configs on test set is 0.8779567630966963
 ```
 ##### Expected output for single node baseline (with best hyperparameters)
-We saved our best model's hyper-parameters in `$WORKSPACE/fraud-detection-usecase/configs/single-node/baseline-xgb-training.yaml`. Simply comment `hpo_spec` section and uncomment `model_spec` section to reproduce our results. 
+We saved our best model's hyper-parameters in `$WORKSPACE/credit-card-fraud-detection/configs/single-node/baseline-xgb-training.yaml`. Simply comment `hpo_spec` section and uncomment `model_spec` section to reproduce our results. 
 ```
 Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess' or there is no need for data preprocessing.
 no need for HPO
@@ -577,7 +577,7 @@ min_child_weight: 8
 aucpr of the best configs on test set is 0.9224617296126916
 ```
 ##### Expected output for single node GNN and XGB training (with best hyperparameters)
-We saved our best model's hyper-parameters in `$WORKSPACE/fraud-detection-usecase/configs/single-node/xgb-training.yaml`. Simply comment `hpo_spec` section and uncomment `model_spec` section to reproduce our results. 
+We saved our best model's hyper-parameters in `$WORKSPACE/credit-card-fraud-detection/configs/single-node/xgb-training.yaml`. Simply comment `hpo_spec` section and uncomment `model_spec` section to reproduce our results. 
 ```
 Failed to read data preprocessing steps. This is either due to wrong parameters defined in the config file as shown: 'data_preprocess' or there is no need for data preprocessing.
 no need for HPO
