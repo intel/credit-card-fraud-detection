@@ -14,4 +14,3 @@ data_preprocess:
   output_data_format: csv
   dp_config_file: data-preprocessing.yaml
   dp_framework: pandas
-  output_data_merged: no

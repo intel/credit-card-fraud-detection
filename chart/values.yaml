@@ -9,9 +9,12 @@ dataset:
     dataset_path: nil
     preprocess_path: nil
     gnn_path: nil
+    user_config_path: nil
   nfs:
     server: nil
     path: nil
     subPath: nil
+    user_config_path: nil
   s3:
     key: nil
+    config_key: nil

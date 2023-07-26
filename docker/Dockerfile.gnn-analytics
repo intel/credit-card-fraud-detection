@@ -1,39 +1,41 @@
 # Copyright (C) 2022 Intel Corporation
 # SPDX-License-Identifier: BSD-3-Clause
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 WORKDIR /
 
 #Install necessary packages
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-	 wget \
-	 net-tools \
-	 python3 \
-	 python3-pip && \
-	 apt-get install -y --no-install-recommends --fix-missing numactl && \
-	 apt-get clean && \
-	 rm -rf /var/lib/apt/lists/*
+RUN apt-get -y update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    openssh-server \
+    wget \
+    curl \
+    expect \
+    net-tools \
+    python3 \
+    python3-pip && \
+    apt-get install -y --no-install-recommends --fix-missing numactl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN ln -sf $(which python3) /usr/local/bin/python && \
     ln -sf $(which python3) /usr/local/bin/python3 && \
     ln -sf $(which python3) /usr/bin/python
 
-#Install packages
-RUN pip install --upgrade pip && \
-    pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu \
-    torchmetrics tqdm cmake numpy pyyaml \
-	scikit-learn ogb chardet && \
-    python3 -m pip install intel_extension_for_pytorch -f https://software.intel.com/ipex-whl-stable
+##Install packages
+COPY ../gnn-analytics/requirements.txt requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt && \
+rm -rf requirements.txt
 
-RUN pip install --pre dgl -f https://data.dgl.ai/wheels/repo.html && \
-    pip install --pre dglgo -f https://data.dgl.ai/wheels-test/repo.html
+SHELL ["/bin/bash", "-c"]
+RUN sed -i 's/#Port 22/Port 12347/g' /etc/ssh/sshd_config
+RUN sed -i 's/#   Port 22/    Port 12347/g' /etc/ssh/ssh_config
+RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+RUN echo "root:docker" | chpasswd
 
 COPY ../gnn-analytics /host
 COPY ../configs/single-node /CONFIGS
 COPY ../wrapper.sh /fraud-detection/wrapper.sh
 COPY ../third_party_programs.txt /licensing/third_party_programs.txt
 
-RUN pip install --no-cache-dir certifi==2022.12.7
-RUN pip install --no-cache-dir urllib3==1.26.5
-RUN pip install --no-cache-dir setuptools==65.5.1
+CMD [ "sh", "-c", "service ssh start; bash"]

@@ -12,7 +12,7 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-classical-ml
+    image: intel/ai-workflows:pa-fraud-detection-classical-ml
     privileged: true
     volumes:
       - ${DATASET_DIR}/raw_data:/workspace/data/raw_data
@@ -32,7 +32,7 @@ services:
       - http_proxy:${http_proxy}
       - https_proxy:${https_proxy}
       - no_proxy:${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-gnn
+    image: intel/ai-workflows:pa-fraud-detection-gnn
     network_mode: "host"
     privileged: true
     shm_size: 200GB
@@ -55,7 +55,7 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-classical-ml
+    image: intel/ai-workflows:pa-fraud-detection-classical-ml
     privileged: true
     volumes:
       - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
@@ -79,7 +79,7 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-classical-ml
+    image: intel/ai-workflows:pa-fraud-detection-classical-ml
     privileged: true
     volumes:
       - ${OUTPUT_DIR}/data/node_edge_data:/workspace/data/node_edge_data
@@ -100,7 +100,7 @@ services:
       - http_proxy:${http_proxy}
       - https_proxy:${https_proxy}
       - no_proxy:${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-gnn
+    image: intel/ai-workflows:pa-fraud-detection-gnn
     network_mode: "host"
     privileged: true
     stdin_open: true
@@ -127,7 +127,7 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-classical-ml
+    image: intel/ai-workflows:pa-fraud-detection-classical-ml
     privileged: true
     stdin_open: true
     tty: true
@@ -152,7 +152,7 @@ services:
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy}
-    image: intel/ai-workflows:beta-fraud-detection-classical-ml
+    image: intel/ai-workflows:pa-fraud-detection-classical-ml
     privileged: true
     stdin_open: true
     tty: true
