@@ -5,7 +5,7 @@ env:
   #  - IP2
   tmp_path: <path-to-work-dir-on-localdisk>/ml_tmp
   data_path: <path-to-work-dir-on-localdisk>/data
-  config_path: <path-to-work-dir-on-localdisk>/fraud-detection-usecase/configs/distributed
+  config_path: <path-to-work-dir-on-localdisk>/credit-card-fraud-detection/configs/distributed
 
 training:
   input_data_path: edge_data
