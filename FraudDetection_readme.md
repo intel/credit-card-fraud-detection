@@ -1,0 +1,1 @@
+You can use this blueprint to process and transform large-scale raw tabular dataset to ready-to-train features automatically, simplify feature engineering process with enhanced performance via parallel data processing frameworks, automated data processing pipeline and built-in domain-specific feature engineering primitives

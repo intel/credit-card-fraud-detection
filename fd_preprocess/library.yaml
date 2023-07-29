@@ -1,0 +1,32 @@
+---
+title: preprocess
+version: 1.0.0
+description:  Run Feature Engineering to get edge features
+icon: python
+
+tags:
+  - feature-engineering
+
+command: bash gnn_analytics.sh
+requirements:
+  cpu: 2
+  memory: 7
+  gpu: 0
+  hpu: 0
+
+image: ai-workflows:beta-fraud-detection-classical-ml
+language: python3
+
+arguments:
+  - key: input-path
+    type: 'categorical'
+    values:
+      - '/data/stratified_credit_card_usecase'
+  - key: output-path
+    type: 'categorical'
+    values:
+      - '/cnvrg/output'
+  - key: config-file
+    type: 'categorical'
+    values:
+      - '/cnvrg/fd_preprocess/config.yaml'

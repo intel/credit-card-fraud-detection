@@ -1,0 +1,14 @@
+#first time run all stages but later you can set stages to False to run with prior results
+#i.e skip building graph and partitions to save time and jump directly to training
+single:
+  build_graph: True
+  #build_graph stage generates CSVDataset files for DGL to ingest data as graph
+  gnn_training: True
+  map_save: True
+  #map_save stage performs the mapping of the computed node embeddings to the input tabular data file
+  
+graph:
+  #provide a name for the graph
+  CSVDataset_name: sym_tabformer_hetero_CSVDatasets
+  name: tabformer_full_homo
+

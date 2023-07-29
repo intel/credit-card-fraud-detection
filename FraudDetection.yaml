@@ -1,0 +1,188 @@
+---
+title: Fraud detection reference kit #rameter
+version: 1.0.0 # Required
+description: Fraud detection reference kit
+long_description: This blueprint is to learn to boost fraud detection accuracy and developer efficiency through Intel's end-to-end, no-code, graph-neural-networks-boosted and single-node workflows.
+# Optional properties for crediting authors
+author: "Intel"
+author_email: "info@cnvrg.io"
+
+tags:
+  - training
+
+# List of tasks (libraries)
+tasks:
+  - title: stratified_credit_card_usecase
+    top: 146
+    left: 112
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: data
+    dataset: stratified_credit_card_usecase
+    use_cached: true
+    sync_type: sync_all
+
+  - title: preprocess
+    top: 146
+    left: 367
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: fd_preprocess
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python start-workflow.py
+
+    requirements:
+      cpu: 12
+      memory: 24
+      gpu: 0
+      hpu: 0
+
+    image: ai-workflows:beta-fraud-detection-classic-ml
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+    - key: input-path
+      type: categorical
+      values:
+      - "/data/stratified_credit_card_usecase"
+    - key: output-path
+      type: categorical
+      values:
+      - "/cnvrg/output"
+    - key: config-file
+      type: categorical
+      values:
+      - "/cnvrg/fd_preprocess/config.yaml"
+
+  - title: baseline-training
+    top: 146
+    left: 641
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: fd_baseline_training
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python start-workflow.py
+
+    requirements:
+      cpu: 12
+      memory: 24
+      gpu: 0
+      hpu: 0
+
+    image: ai-workflows:beta-fraud-detection-classic-ml
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+    - key: input-path
+      type: categorical
+      values:
+      - "/input/preprocess/output"
+    - key: config-file
+      type: categorical
+      values:
+      - "/cnvrg/fd_baseline_training/config.yaml"
+
+  - title: gnn-analytics
+    top: 145
+    left: 918
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: fd_gnn_analytics
+    library_version: 1.0.0
+    # The flattened library parameters (in this case we have training library)
+    command: bash gnn_analytics.sh
+
+    requirements:
+      cpu: 24
+      memory: 48
+      gpu: 0
+      hpu: 0
+
+    image: ai-workflows:beta-fraud-detection-gnn
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+    - key: config-path
+      type: categorical
+      values:
+      - "/cnvrg/fd_gnn_analytics/config"
+    - key: input-file
+      type: categorical
+      values:
+      - "/input/preprocess/processed_data.csv "
+    - key: output-path
+      type: categorical
+      values:
+      - "/cnvrg/output"
+
+  - title: xgb-training
+    top: 146
+    left: 1172
+
+    # Type must be according to the flow task conventions (data, exec, deploy)
+    type: exec
+
+    # The library data
+    library: fd_xgb_training
+    library_version: 1.0.0
+
+    # The flattened library parameters (in this case we have training library)
+    command: python start-workflow.py
+
+    requirements:
+      cpu: 24
+      memory: 48
+      gpu: 0
+      hpu: 0
+
+    image: ai-workflows:beta-fraud-detection-classic-ml
+    language: python3
+
+    # The "arguments" property changes to "params", rest remains the same.
+    # Params in the blueprint yaml can be used to override the arguments in the library.
+    params:
+    - key: input-path
+      type: categorical
+      min: 0
+      max: 0
+      scale: linear
+      steps: 0
+      values:
+      - "/input/gnn_analytics/output"
+    - key: config-file
+      type: categorical
+      min: 0
+      max: 0
+      scale: linear
+      steps: 0
+      values:
+      - "/cnvrg/fd_xgb_training/config.yaml"
+
+relations:
+- from: stratified_credit_card_usecase
+  to: preprocess
+- from: preprocess
+  to: baseline-training
+- from: baseline-training
+  to: gnn-analytics
+- from: gnn-analytics
+  to: xgb-training

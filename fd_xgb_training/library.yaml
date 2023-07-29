@@ -1,0 +1,28 @@
+---
+title: xgb-training
+version: 1.0.0
+description:  Train and Evaluate XGBoost with both edge features and GNN generated node features
+icon: python
+
+tags:
+  - training
+
+command: bash xgb_training.sh
+requirements:
+  cpu: 24
+  memory: 48
+  gpu: 0
+  hpu: 0
+
+image: ai-workflows:beta-fraud-detection-classical-ml
+language: python3
+
+arguments:
+  - key: input-path
+    type: 'categorical'
+    values:
+      - '/input/gnn_analytics/output'
+  - key: config-file
+    type: 'categorical'
+    values:
+      - '/cnvrg/fd_xgb_training/config.yaml'

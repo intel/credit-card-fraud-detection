@@ -1,0 +1,221 @@
+---
+flow: frauddetection-1
+recurring: 
+next_run_utc: 
+tasks:
+- input: bash  fd_gnn_analytics/gnn_analytics.sh
+  params:
+  - key: config-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/cnvrg/fd_gnn_analytics/config"
+  - key: input-file
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/preprocess/output/processed_data.csv"
+  - key: output-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/cnvrg/output"
+  computes:
+  - SPR.medium-large
+  image: intel/ai-workflows:beta-fraud-detection-gnn
+  description: gnn-analytics
+  type: exec
+  git_commit:
+  git_branch:
+  mount_folders: []
+  icon:
+  output_dir: output
+  confirmation: false
+  standalone_mode: false
+  notify_on_error: false
+  notify_on_success: false
+  emails: []
+  objective:
+  objective_goal:
+  objective_function: min
+  max_jobs: -1
+  parallel_jobs: -1
+  algorithm: GridSearch
+  queue_slug: ildjaux68t7dxx7q55lc
+  title: gnn-analytics
+  top: 197
+  left: 642
+  conditions: []
+  commit: d02213f8895ff63896e7e5251fb9a0bc5ac484cd
+- input: python fd_preprocess/start-workflow.py
+  params:
+  - key: input-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/data/stratified_credit_card_usecase"
+  - key: output-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/cnvrg/output"
+  - key: config-file
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/cnvrg/fd_preprocess/config.yaml"
+  computes:
+  - SPR.medium-large
+  image: intel/ai-workflows:beta-fraud-detection-classical-ml
+  description: preprocess
+  type: exec
+  git_commit:
+  git_branch:
+  mount_folders: []
+  icon:
+  output_dir: output
+  confirmation: false
+  standalone_mode: false
+  notify_on_error: false
+  notify_on_success: false
+  emails: []
+  objective:
+  objective_goal:
+  objective_function: min
+  max_jobs: -1
+  parallel_jobs: -1
+  algorithm: GridSearch
+  queue_slug: ildjaux68t7dxx7q55lc
+  title: preprocess
+  top: 146
+  left: 367
+  conditions: []
+  commit: d02213f8895ff63896e7e5251fb9a0bc5ac484cd
+- input: python fd_baseline_training/start-workflow.py
+  params:
+  - key: input-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/preprocess/output"
+  - key: config-file
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/cnvrg/fd_baseline_training/config.yaml"
+  computes:
+  - SPR.medium-large
+  image: intel/ai-workflows:beta-fraud-detection-classical-ml
+  description: baseline-training
+  type: exec
+  git_commit:
+  git_branch:
+  mount_folders: []
+  icon:
+  output_dir: output
+  confirmation: false
+  standalone_mode: false
+  notify_on_error: false
+  notify_on_success: false
+  emails: []
+  objective:
+  objective_goal:
+  objective_function: min
+  max_jobs: -1
+  parallel_jobs: -1
+  algorithm: GridSearch
+  queue_slug: ildjaux68t7dxx7q55lc
+  title: baseline-training
+  top: 32
+  left: 642
+  conditions: []
+  commit: d02213f8895ff63896e7e5251fb9a0bc5ac484cd
+- input: python fd_xgb_training/start-workflow.py
+  params:
+  - key: input-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/gnn_analytics/output"
+  - key: config-file
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/cnvrg/fd_xgb_training/config.yaml"
+  computes:
+  - SPR.medium-large
+  image: intel/ai-workflows:beta-fraud-detection-classical-ml
+  description: xgb-training
+  type: exec
+  git_commit:
+  git_branch:
+  mount_folders: []
+  icon:
+  output_dir: output
+  confirmation: false
+  standalone_mode: false
+  notify_on_error: false
+  notify_on_success: false
+  emails: []
+  objective:
+  objective_goal:
+  objective_function: min
+  max_jobs: -1
+  parallel_jobs: -1
+  algorithm: GridSearch
+  queue_slug: ildjaux68t7dxx7q55lc
+  title: xgb-training
+  top: 197
+  left: 916
+  conditions: []
+  commit: d02213f8895ff63896e7e5251fb9a0bc5ac484cd
+- title: stratified_credit_card_usecase
+  top: 147
+  left: 90
+  description: stratified_credit_card_usecase
+  conditions: []
+  type: data
+  dataset: stratified_credit_card_usecase
+  data_commit:
+  data_query:
+  use_cached: true
+  sync_type: sync_all
+relations:
+- from: preprocess
+  to: baseline-training
+- from: gnn-analytics
+  to: xgb-training
+- from: stratified_credit_card_usecase
+  to: preprocess
+- from: preprocess
+  to: gnn-analytics

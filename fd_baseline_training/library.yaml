@@ -1,0 +1,28 @@
+---
+title: baseline-training
+version: 1.0.0
+description:  Train and evaluate XGBoost model with edge features only
+icon: python
+
+tags:
+  - training
+
+command: bash gnn_analytics.sh
+requirements:
+  cpu: 24
+  memory: 48
+  gpu: 0
+  hpu: 0
+
+image: ai-workflows:beta-fraud-detection-classical-ml
+language: python3
+
+arguments:
+  - key: input-path
+    type: 'categorical'
+    values:
+      - '/input/preprocess/output'
+  - key: config-file
+    type: 'categorical'
+    values:
+      - '/cnvrg/fd_baseline_training/config.yaml'

@@ -1,0 +1,32 @@
+---
+title: gnn analytics
+version: 1.0.0
+description:  Train distributed Graph Neural Network to get node features
+icon: python
+
+tags:
+  - training
+
+command: bash gnn_analytics.sh
+requirements:
+  cpu: 112
+  memory: 256
+  gpu: 0
+  hpu: 0
+
+image: ai-workflows:beta-fraud-detection-gnn
+language: python3
+
+arguments:
+  - key: config-path
+    type: 'categorical'
+    values:
+      - '/cnvrg/fd_gnn_analytics/config'
+  - key: config-path
+    type: 'input-file'
+    values:
+      - '/input/preprocess/output/processed_data.csv'
+  - key: config-path
+    type: 'output-path'
+    values:
+      - '/cnvrg/output'
