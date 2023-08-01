@@ -7,7 +7,7 @@ icon: python
 tags:
   - training
 
-command: bash gnn_analytics.sh
+command: python start-workflow.py
 requirements:
   cpu: 24
   memory: 48
@@ -25,4 +25,4 @@ arguments:
   - key: config-file
     type: 'categorical'
     values:
-      - '/cnvrg/fd_baseline_training/config.yaml'
+      - '/cnvrg/config.yaml'

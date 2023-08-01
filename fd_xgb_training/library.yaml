@@ -7,7 +7,7 @@ icon: python
 tags:
   - training
 
-command: bash xgb_training.sh
+command: python start-workflow.py
 requirements:
   cpu: 24
   memory: 48
@@ -25,4 +25,4 @@ arguments:
   - key: config-file
     type: 'categorical'
     values:
-      - '/cnvrg/fd_xgb_training/config.yaml'
+      - '/cnvrg/config.yaml'
