@@ -178,11 +178,11 @@ tasks:
       - "/cnvrg/fd_xgb_training/config.yaml"
 
 relations:
+- from: preprocess
+  to: baseline-training
+- from: gnn-analytics
+  to: xgb-training
 - from: stratified_credit_card_usecase
   to: preprocess
 - from: preprocess
-  to: baseline-training
-- from: baseline-training
   to: gnn-analytics
-- from: gnn-analytics
-  to: xgb-training
