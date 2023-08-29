@@ -42,7 +42,7 @@ tasks:
       gpu: 0
       hpu: 0
 
-    image: ai-workflows:pa-fraud-detection-classic-ml
+    image: docker.io/intel/ai-workflows:beta-fraud-detection-classic-ml
     language: python3
 
     # The "arguments" property changes to "params", rest remains the same.
@@ -81,7 +81,7 @@ tasks:
       gpu: 0
       hpu: 0
 
-    image: ai-workflows:pa-fraud-detection-classic-ml
+    image: docker.io/intel/ai-workflows:beta-fraud-detection-classic-ml
     language: python3
 
     # The "arguments" property changes to "params", rest remains the same.
@@ -115,7 +115,7 @@ tasks:
       gpu: 0
       hpu: 0
 
-    image: ai-workflows:pa-fraud-detection-gnn
+    image: docker.io/intel/ai-workflows:beta-fraud-detection-gnn
     language: python3
 
     # The "arguments" property changes to "params", rest remains the same.
@@ -154,7 +154,7 @@ tasks:
       gpu: 0
       hpu: 0
 
-    image: ai-workflows:pa-fraud-detection-classic-ml
+    image: docker.io/intel/ai-workflows:beta-fraud-detection-classic-ml
     language: python3
 
     # The "arguments" property changes to "params", rest remains the same.

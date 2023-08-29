@@ -14,7 +14,7 @@ requirements:
   gpu: 0
   hpu: 0
 
-image: ai-workflows:beta-fraud-detection-classical-ml
+image: docker.io/intel/ai-workflows:pa-fraud-detection-classical-ml
 language: python3
 
 arguments:
