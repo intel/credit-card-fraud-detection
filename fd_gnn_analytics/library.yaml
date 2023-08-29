@@ -14,7 +14,7 @@ requirements:
   gpu: 0
   hpu: 0
 
-image: ai-workflows:beta-fraud-detection-gnn
+image: ai-workflows:pa-fraud-detection-gnn
 language: python3
 
 arguments:

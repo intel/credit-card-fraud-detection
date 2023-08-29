@@ -31,7 +31,7 @@ tasks:
     - "/cnvrg/output"
   computes:
   - SPR.medium-large
-  image: intel/ai-workflows:beta-fraud-detection-gnn
+  image: intel/ai-workflows:pa-fraud-detection-gnn
   description: gnn-analytics
   type: exec
   git_commit:
@@ -84,7 +84,7 @@ tasks:
     - "/cnvrg/fd_preprocess/config.yaml"
   computes:
   - SPR.medium-large
-  image: intel/ai-workflows:beta-fraud-detection-classical-ml
+  image: intel/ai-workflows:pa-fraud-detection-classical-ml
   description: preprocess
   type: exec
   git_commit:
@@ -129,7 +129,7 @@ tasks:
     - "/cnvrg/fd_baseline_training/config.yaml"
   computes:
   - SPR.medium-large
-  image: intel/ai-workflows:beta-fraud-detection-classical-ml
+  image: intel/ai-workflows:pa-fraud-detection-classical-ml
   description: baseline-training
   type: exec
   git_commit:
@@ -174,7 +174,7 @@ tasks:
     - "/cnvrg/fd_xgb_training/config.yaml"
   computes:
   - SPR.medium-large
-  image: intel/ai-workflows:beta-fraud-detection-classical-ml
+  image: intel/ai-workflows:pa-fraud-detection-classical-ml
   description: xgb-training
   type: exec
   git_commit:
