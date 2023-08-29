@@ -21,7 +21,7 @@ arguments:
   - key: config-path
     type: 'categorical'
     values:
-      - '/cnvrg/fd_gnn_analytics/config'
+      - '/cnvrg/config'
   - key: config-path
     type: 'input-file'
     values:
