@@ -3,4 +3,4 @@
 
 ## Input Arguments:
 * `--input-path`: full path of input processed data
-* `--config-file`: full path of configuration file
+* `--config-file`: full path of configuration file,to use the default configuration, simply enter "-".
