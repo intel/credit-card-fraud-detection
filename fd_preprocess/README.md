@@ -3,5 +3,4 @@
 
 ## Input Arguments:
 * `--input-path`: path of the dataset
-* `--output-path`: path of output
 * `--config-file`: full path of the configuration file

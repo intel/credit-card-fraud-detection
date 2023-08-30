@@ -12,16 +12,24 @@ tags:
 
 # List of tasks (libraries)
 tasks:
-  - title: stratified_credit_card_usecase
+  - title: data_connector
+    description: data_connector
     top: 146
     left: 112
-
+    command: python3 fetch_data.py
     # Type must be according to the flow task conventions (data, exec, deploy)
-    type: data
-    dataset: stratified_credit_card_usecase
-    use_cached: true
-    sync_type: sync_all
-
+    type: exec
+    params:
+      - key: input-path
+        type: categorical
+        values:
+          - "https://drive.google.com/drive/folders/1AsTXq6uPPnqKiko2LoFVwYNHzhqa8mi9"
+    library: gdrive-connector
+    library_version: 1.0.0
+    image: python:3.8
+    language: python3
+    computes:
+      - SPR.AIA-SPR-small
   - title: preprocess
     top: 146
     left: 367
@@ -51,7 +59,7 @@ tasks:
     - key: input-path
       type: categorical
       values:
-      - "/data/stratified_credit_card_usecase"
+      - "/input/data_connector/fraud_detection/dataset"
     - key: output-path
       type: categorical
       values:
@@ -59,7 +67,7 @@ tasks:
     - key: config-file
       type: categorical
       values:
-      - "/cnvrg/fd_preprocess/config.yaml"
+      - "/input/data_connector/fraud_detection/preprocess.yaml"
 
   - title: baseline-training
     top: 146
@@ -94,7 +102,7 @@ tasks:
     - key: config-file
       type: categorical
       values:
-      - "/cnvrg/fd_baseline_training/config.yaml"
+      - "/input/data_connector/fraud_detection/baseline_training.yaml"
 
   - title: gnn-analytics
     top: 145
@@ -124,11 +132,11 @@ tasks:
     - key: config-path
       type: categorical
       values:
-      - "/cnvrg/fd_gnn_analytics/config"
-    - key: input-file
+      - "/input/data_connector/fraud_detection"
+    - key: input-path
       type: categorical
       values:
-      - "/input/preprocess/processed_data.csv "
+      - "/input/preprocess/output"
     - key: output-path
       type: categorical
       values:
@@ -175,7 +183,7 @@ tasks:
       scale: linear
       steps: 0
       values:
-      - "/cnvrg/fd_xgb_training/config.yaml"
+      - "/input/data_connector/fraud_detection/xgb_training.yaml"
 
 relations:
 - from: preprocess

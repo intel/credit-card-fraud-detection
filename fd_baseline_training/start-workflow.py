@@ -43,7 +43,12 @@ class WFProcessor:
             self.train_data_format = "csv"
             self.train_framework = "pandas"
             self.test_backend = "xgboost-native"
-            self.read_training_configs(cfg.config_file)
+            if cfg.config_file == "":
+                scripts_dir = Path(__file__).parent.resolve()
+                config_file = os.path.join(scripts_dir, "config.yaml")
+                self.read_training_configs(config_file)
+            else:
+                self.read_training_configs(cfg.config_file)
             self.ray_params = None
             self.in_memory = False
         except Exception as e: 

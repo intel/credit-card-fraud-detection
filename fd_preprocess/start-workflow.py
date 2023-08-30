@@ -53,7 +53,13 @@ class WFProcessor:
             self.processed_data_path = cfg.output_path
             os.makedirs(self.processed_data_path, exist_ok=True)
             self.processed_data_format = "csv"
-            self.read_data_processing_steps(cfg.config_file)
+
+            if cfg.config_file == "":
+                scripts_dir = Path(__file__).parent.resolve()
+                config_file = os.path.join(scripts_dir, "config.yaml")
+                self.read_data_processing_steps(config_file)
+            else:
+                self.read_data_processing_steps(cfg.config_file)
             self.dp_engine = "pandas"
             self.has_dp = True
         except Exception as e:

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+BASEDIR=$(dirname "$0")
 if [ $# -ne 6 ]; then
     echo "No arguments provided"
     exit 1
@@ -10,8 +10,8 @@ if [[ "$1" != "--config-path" ]]; then
     exit 1
 fi
 
-if [[ "$3" != "--input-file" ]]; then
-    echo "No 'input-file' parameter provided"
+if [[ "$3" != "--input-path" ]]; then
+    echo "No 'input-path' parameter provided"
     exit 1
 fi
 if [[ "$5" != "--output-path" ]]; then
@@ -20,7 +20,7 @@ if [[ "$5" != "--output-path" ]]; then
 fi
 
 export CONFIG_PATH=$2
-export DATA_IN_FILE=$4
+export DATA_IN_FILE=$4/processed_data.csv
 export DATA_OUT=$6
 mkdir -p ${DATA_OUT}
 
