@@ -65,8 +65,10 @@ class WFProcessor:
                 scripts_dir = Path(__file__).parent.resolve()
                 config_file = os.path.join(scripts_dir, "config.yaml")
                 self.read_data_processing_steps(config_file)
+                print('Reading config file: ' + config_file)
             else:
                 self.read_data_processing_steps(cfg.config_file)
+                print('Reading config file: ' + cfg.config_file)
             self.dp_engine = "pandas"
             self.has_dp = True
         except Exception as e:

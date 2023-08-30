@@ -50,8 +50,10 @@ class WFProcessor:
                 scripts_dir = Path(__file__).parent.resolve()
                 config_file = os.path.join(scripts_dir, "config.yaml")
                 self.read_training_configs(config_file)
+                print('Reading config file: ' + config_file)
             else:
                 self.read_training_configs(cfg.config_file)
+                print('Reading config file: ' + cfg.config_file)
             self.ray_params = None
             self.in_memory = False
         except Exception as e: 
