@@ -39,11 +39,19 @@ class WFProcessor:
             os.makedirs(self.model_save_path, exist_ok=True)
             self.worker_ips = None
             self.dp_engine = 'pandas'
-            self.train_data_path = cfg.input_path
+            if cfg.input_path is None or cfg.input_path == "":
+                self.train_data_path = "/input/preprocess/output"
+            else:
+                self.train_data_path = cfg.input_path
             self.train_data_format = "csv"
             self.train_framework = "pandas"
             self.test_backend = "xgboost-native"
-            self.read_training_configs(cfg.config_file)
+            if cfg.config_file is None or cfg.config_file == "":
+                scripts_dir = Path(__file__).parent.resolve()
+                config_file = os.path.join(scripts_dir, "config.yaml")
+                self.read_training_configs(config_file)
+            else:
+                self.read_training_configs(cfg.config_file)
             self.ray_params = None
             self.in_memory = False
         except Exception as e: 
@@ -102,13 +110,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--input-path",
-        required=True,
+        required=False,
         default="/input/preprocess/output",
         type=str,
         help="speficy the preprocess file name")
     parser.add_argument(
         "--config-file",
-        required=True,
+        required=False,
         type=str,
         help="speficy the config file name")
     

@@ -25,4 +25,4 @@ arguments:
   - key: config-file
     type: 'categorical'
     values:
-      - '/cnvrg/config.yaml'
+      - '/input/data_connector/fraud_detection/xgb_training.yaml'

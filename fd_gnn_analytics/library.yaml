@@ -21,12 +21,12 @@ arguments:
   - key: config-path
     type: 'categorical'
     values:
-      - '/cnvrg/config'
-  - key: config-path
-    type: 'input-file'
+      - '/input/data_connector/fraud_detection'
+  - key: input-path
+    type: 'categorical'
     values:
-      - '/input/preprocess/output/processed_data.csv'
-  - key: config-path
-    type: 'output-path'
+      - '/input/preprocess/output'
+  - key: output-path
+    type: 'categorical'
     values:
       - '/cnvrg/output'
