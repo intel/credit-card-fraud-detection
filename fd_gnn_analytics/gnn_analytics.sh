@@ -19,7 +19,12 @@ if [[ "$5" != "--output-path" ]]; then
     exit 1
 fi
 
-export CONFIG_PATH=$2
+config_path=$2
+
+if [[ "$2" == "-" ]]; then
+  config_path=${BASEDIR}/config
+
+export CONFIG_PATH=${config_path}
 export DATA_IN_FILE=$4/processed_data.csv
 export DATA_OUT=$6
 mkdir -p ${DATA_OUT}
@@ -27,4 +32,4 @@ mkdir -p ${DATA_OUT}
 export WORKSPACE=${BASEDIR}
 
 mkdir -p /GNN_TMP
-bash ${BASEDIR}/script/run_gnn_wf_docker.sh ${BASEDIR}/config/config.yaml
+bash ${BASEDIR}/script/run_gnn_wf_docker.sh ${config_path}/config.yaml

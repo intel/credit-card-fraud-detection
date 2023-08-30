@@ -39,14 +39,14 @@ class WFProcessor:
             os.makedirs(self.model_save_path, exist_ok=True)
             self.worker_ips = None
             self.dp_engine = 'pandas'
-            if cfg.input_path is None or cfg.input_path == "":
+            if cfg.input_path is None or cfg.input_path == "-":
                 self.train_data_path = "/input/gnn_analytics/output"
             else:
                 self.train_data_path = cfg.input_path
             self.train_data_format = "csv"
             self.train_framework = "pandas"
             self.test_backend = "xgboost-native"
-            if cfg.config_file is None or cfg.config_file == "":
+            if cfg.config_file is None or cfg.config_file == "-":
                 scripts_dir = Path(__file__).parent.resolve()
                 config_file = os.path.join(scripts_dir, "config.yaml")
                 self.read_training_configs(config_file)
