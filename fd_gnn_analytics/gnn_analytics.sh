@@ -24,7 +24,7 @@ export DATA_IN_FILE=$4/processed_data.csv
 export DATA_OUT=$6
 mkdir -p ${DATA_OUT}
 
-export WORKSPACE=/cnvrg/fd_gnn_analytics
+export WORKSPACE=${BASEDIR}
 
 mkdir -p /GNN_TMP
-bash /cnvrg/fd_gnn_analytics/script/run_gnn_wf_docker.sh ${CONFIG_PATH}/config.yaml
+bash ${BASEDIR}/script/run_gnn_wf_docker.sh ${BASEDIR}/config/config.yaml

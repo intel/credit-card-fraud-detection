@@ -47,14 +47,21 @@ class WFProcessor:
             self.train_framework = "pandas"
             self.test_backend = "xgboost-native"
             self.has_training = False
-            self.raw_data_path = self.fetch_data(cfg.input_path)
+            if cfg.input_path is None or cfg.input_path == "":
+                self.raw_data_path = self.fetch_data("/input/data_connector/fraud_detection/dataset")
+            else:
+                self.raw_data_path = self.fetch_data(cfg.input_path)
             self.raw_data_format = "csv"
             self.dp_framework = "pandas"
-            self.processed_data_path = cfg.output_path
+            if cfg.output_path is None or cfg.output_path == "":
+                scripts_dir = Path(__file__).parent.resolve()
+                output_path = os.path.join(scripts_dir, "/output")
+                self.processed_data_path = output_path
+            else:
+                self.processed_data_path = cfg.output_path
             os.makedirs(self.processed_data_path, exist_ok=True)
             self.processed_data_format = "csv"
-
-            if cfg.config_file == "":
+            if cfg.config_file is None or cfg.config_file == "":
                 scripts_dir = Path(__file__).parent.resolve()
                 config_file = os.path.join(scripts_dir, "config.yaml")
                 self.read_data_processing_steps(config_file)
@@ -69,7 +76,7 @@ class WFProcessor:
             sys.exit()
 
     def fetch_data(self,dataset_path):
-        
+
         if dataset_path.startswith("https://"):
             a = urlparse(dataset_path)
             output_dir = "/tmp/"
@@ -153,17 +160,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
             "--input-path",
-            required=True,
+            required=False,
             type=str,
             help="specify the input dataset file path")
     parser.add_argument(
             "--output-path",
-            required=True,
+            required=False,
             type=str,
             help="specify the output file path")
     parser.add_argument(
             "--config-file",
-            required=True,
+            required=False,
             type=str,
             help="specify the config file name")
 
