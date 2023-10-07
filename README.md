@@ -73,7 +73,7 @@ xgboost model is saved under /workspace/tmp/models.
 ## Learn More
 To read about other use cases and workflows examples, see these resources:
 
-- [Enhanced Fraud Detection Using Graph Neural Networks with Intel Optimizations] (https://community.intel.com/t5/Blogs/Tech-Innovation/Artificial-Intelligence-AI/Enhanced-Fraud-Detection-Using-Graph-Neural-Networks-with-Intel/post/1524316)
+- [Enhanced Fraud Detection Using Graph Neural Networks with Intel Optimizations](https://community.intel.com/t5/Blogs/Tech-Innovation/Artificial-Intelligence-AI/Enhanced-Fraud-Detection-Using-Graph-Neural-Networks-with-Intel/post/1524316)
 - [Intel's Open Domain Question Answering workflow](https://github.com/intel/open-domain-question-and-answer)
 - [Developer Catalog](https://developer.intel.com/aireferenceimplementations)
 - [Intel® AI Analytics Toolkit (AI Kit)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html)
