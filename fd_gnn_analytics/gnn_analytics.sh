@@ -32,4 +32,4 @@ mkdir -p ${DATA_OUT}
 export WORKSPACE=${BASEDIR}
 
 mkdir -p /GNN_TMP
-bash ${BASEDIR}/script/run_gnn_wf_docker.sh ${config_path}/config.yaml
+bash ${BASEDIR}/script/run_gnn_wf_docker.sh ${config_path}/gnn_analytics.yaml
