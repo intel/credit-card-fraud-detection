@@ -49,24 +49,24 @@ Failed to read end2end training configurations. This is either due to wrong para
 enter single-node mode...
 reading training data...
 reading without dropping columns...
-data has the shape (24198836, 26)
+data has the shape (24198836, 154)
 start training models soon...
-(24198836, 22)
+(24198836, 150)
 read and prepare data for training...
 start xgboost model training...
-[0]     train-aucpr:0.41938     eval-aucpr:0.41885      test-aucpr:0.36533
-[100]   train-aucpr:0.78485     eval-aucpr:0.90691      test-aucpr:0.89396
-[200]   train-aucpr:0.81402     eval-aucpr:0.92188      test-aucpr:0.89991
-[300]   train-aucpr:0.84193     eval-aucpr:0.92164      test-aucpr:0.89123
-[400]   train-aucpr:0.86475     eval-aucpr:0.91879      test-aucpr:0.88308
-[500]   train-aucpr:0.87911     eval-aucpr:0.91601      test-aucpr:0.87810
-[600]   train-aucpr:0.88980     eval-aucpr:0.91699      test-aucpr:0.87880
-[700]   train-aucpr:0.89974     eval-aucpr:0.91588      test-aucpr:0.88025
-[800]   train-aucpr:0.90777     eval-aucpr:0.91510      test-aucpr:0.87856
-[900]   train-aucpr:0.91517     eval-aucpr:0.91347      test-aucpr:0.87711
-[999]   train-aucpr:0.92204     eval-aucpr:0.91267      test-aucpr:0.87582
+[0]     train-aucpr:0.48145     eval-aucpr:0.23717      test-aucpr:0.21672
+[100]   train-aucpr:0.80701     eval-aucpr:0.84678      test-aucpr:0.83616
+[200]   train-aucpr:0.85851     eval-aucpr:0.93348      test-aucpr:0.95080
+[300]   train-aucpr:0.88907     eval-aucpr:0.93487      test-aucpr:0.95312
+[400]   train-aucpr:0.91095     eval-aucpr:0.93121      test-aucpr:0.95203
+[500]   train-aucpr:0.92976     eval-aucpr:0.93077      test-aucpr:0.95142
+[600]   train-aucpr:0.94440     eval-aucpr:0.92910      test-aucpr:0.94902
+[700]   train-aucpr:0.95611     eval-aucpr:0.92940      test-aucpr:0.94795
+[800]   train-aucpr:0.96405     eval-aucpr:0.92913      test-aucpr:0.94606
+[900]   train-aucpr:0.97143     eval-aucpr:0.92884      test-aucpr:0.94424
+[999]   train-aucpr:0.97721     eval-aucpr:0.92824      test-aucpr:0.94275
 start xgboost model testing...
-testing results: aucpr on test set is 0.8758093307052992
+testing results: aucpr on test set is 0.9427465838947949
 xgboost model is saved under /workspace/tmp/models.
 ```
 
