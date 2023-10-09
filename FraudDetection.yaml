@@ -115,7 +115,7 @@ tasks:
     library: fd_gnn_analytics
     library_version: 1.0.0
     # The flattened library parameters (in this case we have training library)
-    command: bash gnn_analytics.sh
+    command: python gnn_analytics.py
 
     requirements:
       cpu: 24
