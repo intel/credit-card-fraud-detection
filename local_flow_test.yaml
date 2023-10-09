@@ -1,98 +1,8 @@
 ---
 flow: FraudDetection
-recurring:
-next_run_utc:
+recurring: 
+next_run_utc: 
 tasks:
-- input: python fd_baseline_training/start-workflow.py
-  params:
-  - key: input-path
-    type: categorical
-    min: 0
-    max: 0
-    scale: linear
-    steps: 0
-    values:
-    - "/input/preprocess/output"
-  - key: config-file
-    type: categorical
-    min: 0
-    max: 0
-    scale: linear
-    steps: 0
-    values:
-    - "/input/data_connector/fraud_detection/baseline_training.yaml"
-  computes:
-  - SPR.medium-large
-  image: ai-workflows:pa-fraud-detection-classical-ml
-  description: baseline-training
-  type: exec
-  git_commit:
-  git_branch:
-  mount_folders: []
-  icon:
-  output_dir: output
-  confirmation: false
-  standalone_mode: false
-  notify_on_error: false
-  notify_on_success: false
-  emails: []
-  objective:
-  objective_goal:
-  objective_function: min
-  max_jobs: -1
-  parallel_jobs: -1
-  algorithm: GridSearch
-  queue_slug: ildjaux68t7dxx7q55lc
-  title: baseline-training
-  top: 32
-  left: 642
-  conditions: []
-  commit: 111c78a9861e51488b88b8014476fbb56f3c0566
-- input: python fd_xgb_training/start-workflow.py
-  params:
-  - key: input-path
-    type: categorical
-    min: 0
-    max: 0
-    scale: linear
-    steps: 0
-    values:
-    - "/input/gnn_analytics/output"
-  - key: config-file
-    type: categorical
-    min: 0
-    max: 0
-    scale: linear
-    steps: 0
-    values:
-    - "/input/data_connector/fraud_detection/xgb_training.yaml"
-  computes:
-  - SPR.medium-large
-  image: ai-workflows:pa-fraud-detection-classical-ml
-  description: xgb-training
-  type: exec
-  git_commit:
-  git_branch:
-  mount_folders: []
-  icon:
-  output_dir: output
-  confirmation: false
-  standalone_mode: false
-  notify_on_error: false
-  notify_on_success: false
-  emails: []
-  objective:
-  objective_goal:
-  objective_function: min
-  max_jobs: -1
-  parallel_jobs: -1
-  algorithm: GridSearch
-  queue_slug: ildjaux68t7dxx7q55lc
-  title: xgb-training
-  top: 197
-  left: 916
-  conditions: []
-  commit: 111c78a9861e51488b88b8014476fbb56f3c0566
 - input: python3 fetch_data.py
   params:
   - key: dir_url
@@ -108,8 +18,8 @@ tasks:
   image: python:3.8
   description: data_connector
   type: exec
-  git_commit:
-  git_branch:
+  git_commit: 
+  git_branch: 
   mount_folders: []
   icon: python
   output_dir: ''
@@ -118,8 +28,8 @@ tasks:
   notify_on_error: false
   notify_on_success: false
   emails: []
-  objective:
-  objective_goal:
+  objective: 
+  objective_goal: 
   objective_function: min
   max_jobs: -1
   parallel_jobs: -1
@@ -131,7 +41,7 @@ tasks:
   conditions: []
   library: gdrive-connector
   library_version: 1.0.0
-  commit: 111c78a9861e51488b88b8014476fbb56f3c0566
+  commit: 984b8381fc103c1e2c2b27faad7016f4c8218b98
 - input: python fd_preprocess/start-workflow.py
   params:
   - key: input-path
@@ -163,18 +73,18 @@ tasks:
   image: ai-workflows:pa-fraud-detection-classical-ml
   description: preprocess
   type: exec
-  git_commit:
-  git_branch:
+  git_commit: 
+  git_branch: 
   mount_folders: []
-  icon:
+  icon: 
   output_dir: output
   confirmation: false
   standalone_mode: false
   notify_on_error: false
   notify_on_success: false
   emails: []
-  objective:
-  objective_goal:
+  objective: 
+  objective_goal: 
   objective_function: min
   max_jobs: -1
   parallel_jobs: -1
@@ -184,8 +94,53 @@ tasks:
   top: 146
   left: 367
   conditions: []
-  commit: 111c78a9861e51488b88b8014476fbb56f3c0566
-- input: bash  fd_gnn_analytics/gnn_analytics.sh
+  commit: 984b8381fc103c1e2c2b27faad7016f4c8218b98
+- input: python fd_baseline_training/start-workflow.py
+  params:
+  - key: input-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/preprocess/output"
+  - key: config-file
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/data_connector/fraud_detection/baseline_training.yaml"
+  computes:
+  - SPR.medium-large
+  image: ai-workflows:pa-fraud-detection-classical-ml
+  description: baseline-training
+  type: exec
+  git_commit: 
+  git_branch: 
+  mount_folders: []
+  icon: 
+  output_dir: output
+  confirmation: false
+  standalone_mode: false
+  notify_on_error: false
+  notify_on_success: false
+  emails: []
+  objective: 
+  objective_goal: 
+  objective_function: min
+  max_jobs: -1
+  parallel_jobs: -1
+  algorithm: GridSearch
+  queue_slug: ildjaux68t7dxx7q55lc
+  title: baseline-training
+  top: 32
+  left: 642
+  conditions: []
+  commit: 984b8381fc103c1e2c2b27faad7016f4c8218b98
+- input: python fd_gnn_analytics/gnn_analytics.py
   params:
   - key: config-path
     type: categorical
@@ -195,14 +150,14 @@ tasks:
     steps: 0
     values:
     - "/input/data_connector/fraud_detection"
-  - key: input-file
+  - key: input-path
     type: categorical
     min: 0
     max: 0
     scale: linear
     steps: 0
     values:
-    - "/input/preprocess/output/processed_data.csv"
+    - "/input/preprocess/output"
   - key: output-path
     type: categorical
     min: 0
@@ -216,18 +171,18 @@ tasks:
   image: ai-workflows:pa-fraud-detection-gnn
   description: gnn-analytics
   type: exec
-  git_commit:
-  git_branch:
+  git_commit: 
+  git_branch: 
   mount_folders: []
-  icon:
+  icon: 
   output_dir: output
   confirmation: false
   standalone_mode: false
   notify_on_error: false
   notify_on_success: false
   emails: []
-  objective:
-  objective_goal:
+  objective: 
+  objective_goal: 
   objective_function: min
   max_jobs: -1
   parallel_jobs: -1
@@ -237,7 +192,52 @@ tasks:
   top: 197
   left: 642
   conditions: []
-  commit: 111c78a9861e51488b88b8014476fbb56f3c0566
+  commit: 984b8381fc103c1e2c2b27faad7016f4c8218b98
+- input: python fd_xgb_training/start-workflow.py
+  params:
+  - key: input-path
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/gnn_analytics/output"
+  - key: config-file
+    type: categorical
+    min: 0
+    max: 0
+    scale: linear
+    steps: 0
+    values:
+    - "/input/data_connector/fraud_detection/xgb_training.yaml"
+  computes:
+  - SPR.medium-large
+  image: ai-workflows:pa-fraud-detection-classical-ml
+  description: xgb-training
+  type: exec
+  git_commit: 
+  git_branch: 
+  mount_folders: []
+  icon: 
+  output_dir: output
+  confirmation: false
+  standalone_mode: false
+  notify_on_error: false
+  notify_on_success: false
+  emails: []
+  objective: 
+  objective_goal: 
+  objective_function: min
+  max_jobs: -1
+  parallel_jobs: -1
+  algorithm: GridSearch
+  queue_slug: ildjaux68t7dxx7q55lc
+  title: xgb-training
+  top: 197
+  left: 916
+  conditions: []
+  commit: 984b8381fc103c1e2c2b27faad7016f4c8218b98
 relations:
 - from: preprocess
   to: baseline-training

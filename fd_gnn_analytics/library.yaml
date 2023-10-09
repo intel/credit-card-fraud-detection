@@ -7,7 +7,7 @@ icon: python
 tags:
   - training
 
-command: bash gnn_analytics.sh
+command: python gnn_analytics.py
 requirements:
   cpu: 112
   memory: 256
