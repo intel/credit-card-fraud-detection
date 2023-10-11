@@ -21,7 +21,7 @@ arguments:
   - key: input-path
     type: 'categorical'
     values:
-      - '/input/data-connector/fraud_detection/dataset'
+      - '/input/gdrive-connector/fraud_detection/dataset'
   - key: output-path
     type: 'categorical'
     values:
@@ -29,4 +29,4 @@ arguments:
   - key: config-file
     type: 'categorical'
     values:
-      - '/input/data-connector/fraud_detection/preprocess.yaml'
+      - '/input/gdrive-connector/fraud_detection/preprocess.yaml'

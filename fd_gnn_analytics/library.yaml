@@ -21,7 +21,7 @@ arguments:
   - key: config-path
     type: 'categorical'
     values:
-      - '/input/data-connector/fraud_detection'
+      - '/input/gdrive-connector/fraud_detection'
   - key: input-path
     type: 'categorical'
     values:

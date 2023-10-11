@@ -25,4 +25,4 @@ arguments:
   - key: config-file
     type: 'categorical'
     values:
-      - '/input/data-connector/fraud_detection/xgb_training.yaml'
+      - '/input/gdrive-connector/fraud_detection/xgb_training.yaml'

@@ -12,8 +12,8 @@ tags:
 
 # List of tasks (libraries)
 tasks:
-  - title: data-connector
-    description: data-connector
+  - title: gdrive-connector
+    description: gdrive-connector
     top: 146
     left: 112
     command: python3 fetch_data.py
@@ -59,7 +59,7 @@ tasks:
     - key: input-path
       type: categorical
       values:
-      - "/input/data-connector/fraud_detection/dataset"
+      - "/input/gdrive-connector/fraud_detection/dataset"
     - key: output-path
       type: categorical
       values:
@@ -67,7 +67,7 @@ tasks:
     - key: config-file
       type: categorical
       values:
-      - "/input/data-connector/fraud_detection/preprocess.yaml"
+      - "/input/gdrive-connector/fraud_detection/preprocess.yaml"
 
   - title: baseline-training
     top: 146
@@ -102,7 +102,7 @@ tasks:
     - key: config-file
       type: categorical
       values:
-      - "/input/data-connector/fraud_detection/baseline_training.yaml"
+      - "/input/gdrive-connector/fraud_detection/baseline_training.yaml"
 
   - title: gnn-analytics
     top: 145
@@ -132,7 +132,7 @@ tasks:
     - key: config-path
       type: categorical
       values:
-      - "/input/data-connector/fraud_detection"
+      - "/input/gdrive-connector/fraud_detection"
     - key: input-path
       type: categorical
       values:
@@ -183,7 +183,7 @@ tasks:
       scale: linear
       steps: 0
       values:
-      - "/input/data-connector/fraud_detection/xgb_training.yaml"
+      - "/input/gdrive-connector/fraud_detection/xgb_training.yaml"
 
 relations:
 - from: preprocess
@@ -192,5 +192,5 @@ relations:
   to: xgb-training
 - from: preprocess
   to: gnn-analytics
-- from: data-connector
+- from: gdrive-connector
   to: preprocess

@@ -16,7 +16,7 @@ tasks:
   computes:
   - SPR.AIA-SPR-small
   image: python:3.8
-  description: data-connector
+  description: gdrive-connector
   type: exec
   git_commit: 
   git_branch: 
@@ -35,7 +35,7 @@ tasks:
   parallel_jobs: -1
   algorithm: GridSearch
   queue_slug: ildjaux68t7dxx7q55lc
-  title: data-connector
+  title: gdrive-connector
   top: 146
   left: 110
   conditions: []
@@ -51,7 +51,7 @@ tasks:
     scale: linear
     steps: 0
     values:
-    - "/input/data-connector/fraud_detection/dataset"
+    - "/input/gdrive-connector/fraud_detection/dataset"
   - key: output-path
     type: categorical
     min: 0
@@ -67,7 +67,7 @@ tasks:
     scale: linear
     steps: 0
     values:
-    - "/input/data-connector/fraud_detection/preprocess.yaml"
+    - "/input/gdrive-connector/fraud_detection/preprocess.yaml"
   computes:
   - SPR.medium-large
   image: ai-workflows:pa-fraud-detection-classical-ml
@@ -112,7 +112,7 @@ tasks:
     scale: linear
     steps: 0
     values:
-    - "/input/data-connector/fraud_detection/baseline_training.yaml"
+    - "/input/gdrive-connector/fraud_detection/baseline_training.yaml"
   computes:
   - SPR.medium-large
   image: ai-workflows:pa-fraud-detection-classical-ml
@@ -149,7 +149,7 @@ tasks:
     scale: linear
     steps: 0
     values:
-    - "/input/data-connector/fraud_detection"
+    - "/input/gdrive-connector/fraud_detection"
   - key: input-path
     type: categorical
     min: 0
@@ -210,7 +210,7 @@ tasks:
     scale: linear
     steps: 0
     values:
-    - "/input/data-connector/fraud_detection/xgb_training.yaml"
+    - "/input/gdrive-connector/fraud_detection/xgb_training.yaml"
   computes:
   - SPR.medium-large
   image: ai-workflows:pa-fraud-detection-classical-ml
@@ -245,5 +245,5 @@ relations:
   to: xgb-training
 - from: preprocess
   to: gnn-analytics
-- from: data-connector
+- from: gdrive-connector
   to: preprocess
