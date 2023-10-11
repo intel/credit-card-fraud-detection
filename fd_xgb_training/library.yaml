@@ -25,4 +25,4 @@ arguments:
   - key: config-file
     type: 'categorical'
     values:
-      - '/input/data_connector/fraud_detection/xgb_training.yaml'
+      - '/input/data-connector/fraud_detection/xgb_training.yaml'

@@ -1,5 +1,5 @@
 ---
-title: sampled_data_connector
+title: data-connector
 version: 1.0.0
 description:  Download dataset from public Google Drive folder 
 icon: python

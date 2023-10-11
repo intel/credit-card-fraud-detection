@@ -1,5 +1,5 @@
 ---
-title: gnn analytics
+title: gnn-analytics
 version: 1.0.0
 description:  Train distributed Graph Neural Network to get node features
 icon: python
@@ -21,7 +21,7 @@ arguments:
   - key: config-path
     type: 'categorical'
     values:
-      - '/input/data_connector/fraud_detection'
+      - '/input/data-connector/fraud_detection'
   - key: input-path
     type: 'categorical'
     values:

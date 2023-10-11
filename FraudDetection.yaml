@@ -12,8 +12,8 @@ tags:
 
 # List of tasks (libraries)
 tasks:
-  - title: data_connector
-    description: data_connector
+  - title: data-connector
+    description: data-connector
     top: 146
     left: 112
     command: python3 fetch_data.py
@@ -59,7 +59,7 @@ tasks:
     - key: input-path
       type: categorical
       values:
-      - "/input/data_connector/fraud_detection/dataset"
+      - "/input/data-connector/fraud_detection/dataset"
     - key: output-path
       type: categorical
       values:
@@ -67,7 +67,7 @@ tasks:
     - key: config-file
       type: categorical
       values:
-      - "/input/data_connector/fraud_detection/preprocess.yaml"
+      - "/input/data-connector/fraud_detection/preprocess.yaml"
 
   - title: baseline-training
     top: 146
@@ -102,7 +102,7 @@ tasks:
     - key: config-file
       type: categorical
       values:
-      - "/input/data_connector/fraud_detection/baseline_training.yaml"
+      - "/input/data-connector/fraud_detection/baseline_training.yaml"
 
   - title: gnn-analytics
     top: 145
@@ -132,7 +132,7 @@ tasks:
     - key: config-path
       type: categorical
       values:
-      - "/input/data_connector/fraud_detection"
+      - "/input/data-connector/fraud_detection"
     - key: input-path
       type: categorical
       values:
@@ -183,14 +183,14 @@ tasks:
       scale: linear
       steps: 0
       values:
-      - "/input/data_connector/fraud_detection/xgb_training.yaml"
+      - "/input/data-connector/fraud_detection/xgb_training.yaml"
 
 relations:
 - from: preprocess
   to: baseline-training
 - from: gnn-analytics
   to: xgb-training
-- from: stratified_credit_card_usecase
-  to: preprocess
 - from: preprocess
   to: gnn-analytics
+- from: data-connector
+  to: preprocess

@@ -48,7 +48,7 @@ class WFProcessor:
             self.test_backend = "xgboost-native"
             self.has_training = False
             if cfg.input_path is None or cfg.input_path == "-":
-                self.raw_data_path = self.fetch_data("/input/data_connector/fraud_detection/dataset")
+                self.raw_data_path = self.fetch_data("/input/data-connector/fraud_detection/dataset")
             else:
                 self.raw_data_path = self.fetch_data(cfg.input_path)
             self.raw_data_format = "csv"
