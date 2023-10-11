@@ -38,7 +38,7 @@ tasks:
     type: exec
 
     # The library data
-    library: fd_preprocess
+    library: preprocess
     library_version: 1.0.0
 
     # The flattened library parameters (in this case we have training library)
@@ -77,7 +77,7 @@ tasks:
     type: exec
 
     # The library data
-    library: fd_baseline_training
+    library: baseline-training
     library_version: 1.0.0
 
     # The flattened library parameters (in this case we have training library)
@@ -112,7 +112,7 @@ tasks:
     type: exec
 
     # The library data
-    library: fd_gnn_analytics
+    library: gnn-analytics
     library_version: 1.0.0
     # The flattened library parameters (in this case we have training library)
     command: python gnn_analytics.py
@@ -150,7 +150,7 @@ tasks:
     type: exec
 
     # The library data
-    library: fd_xgb_training
+    library: xgb-training
     library_version: 1.0.0
 
     # The flattened library parameters (in this case we have training library)
