@@ -1,0 +1,56 @@
+data_processing:
+    pre_splitting_transformation:
+    - normalize_feature_names: 
+        - replace_chars: {' ': '_'}
+        - lowercase: True
+    - categorify:
+        merchant_name: merchant_id 
+        #   is_fraud?: is_fraud?
+    - strip_chars:
+        amount: {'amount':'$'}
+    - combine_cols:
+        card_id: {'concatenate_strings': ['user','card']}
+    - time_to_seconds:
+        time: time
+    - change_datatype:
+        merchant_city: category
+        merchant_state: category
+        mcc: category 
+        zip: ['str','category']
+        amount: float32
+        time: uint8 
+        card_id: float32
+    - min_max_normalization:
+        time: time 
+    - one_hot_encoding:
+        use_chip: True 
+    - string_to_list:
+        errors?: {'errors?': ','}
+    - multi_hot_encoding:
+        errors?: True 
+    - add_constant_feature:
+        split: 0
+    - define_variable:
+        train_card_ids: 'df.loc[df["split"] == 0, "card_id"]'
+        train_merch_ids: 'df.loc[df["split"] == 0, "merchant_id"]'
+    - modify_on_conditions:
+        split:
+            '(df["split"] != 0) & ~df["card_id"].isin(tmp["train_card_ids"])': 3
+            '(df["split"] != 0) & ~df["merchant_id"].isin(tmp["train_merch_ids"])': 3
+        
+            
+    post_splitting_transformation: 
+        - target_encoding: 
+            feature_cols: ["merchant_city", "merchant_state", "zip", "mcc"]
+            encoders_path: '/workspace/models/credit_card_xgb/1/target_encoders.pkl'
+
+    data_spec:
+        target_col: is_fraud?
+        ignore_cols: ['user', 'card', 'merchant_name', 'split']
+    data_split:
+        train: df[df["year"]<2018]
+        valid: df[df["year"]==2018]
+        test: df[df["year"]>2018
+
+
+classification_threshold: 0.8

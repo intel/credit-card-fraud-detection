@@ -1,0 +1,9 @@
+origin_transaction_file: "/workspace/models/credit_card_gnn/1/card_transaction.v1.csv"
+graph_config_file: "/workspace/models/credit_card_gnn/1/tabular2graph.yaml"
+node2ID_file: "/workspace/models/credit_card_gnn/1/sym_tabformer_hetero_CSVDatasets/node2ID.pkl"
+graph_folder: "/workspace/models/credit_card_gnn/1/sym_tabformer_hetero_CSVDatasets"
+model:
+  vocab_size: 98080
+  hid_size: 64
+  n_layers: 2
+  model_path: "/workspace/models/credit_card_gnn/1/model_graphsage_2L_64.pt"

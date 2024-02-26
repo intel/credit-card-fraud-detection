@@ -164,3 +164,51 @@ services:
       - ${WORKSPACE:-$PWD/../classical-ml}:/fraud-detection/classical-ml
       - $PWD/../wrapper.sh:/fraud-detection/wrapper.sh
     working_dir: /fraud-detection/classical-ml
+  xgb-serve:
+    build:
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+      dockerfile: docker/Dockerfile.fraud-detect
+      context: ../
+    command: '${SCRIPT:-/fraud-detection/wrapper.sh} ${PARAMETER:---xgb-serve}'
+    network_mode: "host"
+    environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - no_proxy=${no_proxy}
+    image: intel/ai-workflows:pa-fraud-detection-serve
+    privileged: true
+    volumes:
+      - ${CONFIG_DIR:-$PWD/../configs/single-node}:/workspace/configs
+      - ${MODEL_DIR:-$PWD/../fraud_detect/serve/triton/server}:/workspace/models
+    working_dir: /fraud-detection
+    ports:
+      - "8081:8081"
+      - "8265:8265"
+    shm_size: ${SHM_SIZE:-10.24gb}
+  tritonserver:
+    volumes:
+      - ${MODEL_DIR:-$PWD/../fraud_detect/serve/triton/server}:/workspace/models
+      - ${ENV_DIR:-$PWD/../environments}:/workspace/environments
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        pip install -r /workspace/environments/requirements_triton_serve.txt && \
+        tritonserver --model-repository=/workspace/models
+    container_name: triton-server
+    image: nvcr.io/nvidia/tritonserver:23.01-py3
+    privileged: true
+    network_mode: "host"
+    ulimits:
+      memlock: -1
+    environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - no_proxy=${no_proxy}
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"

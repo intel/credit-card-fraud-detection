@@ -1,0 +1,49 @@
+---
+
+models_path: "/workspace/models"
+app_name:  "credit_card"
+
+gradio_config:
+  # gradio server host
+  server_name: '0.0.0.0'
+
+serve_config:
+  # triton server host
+  host: 'localhost'
+  # triton server port
+  port: 8001
+  # triton server connection timeout
+  connect_timeout: 120
+
+applications:
+  credit_card:
+    app_title: "Credit Card Fraud Detection"
+    # model name for xgboost model
+    xgb_model_name: "credit_card_final_xgb"
+    # model version for xgboost model
+    xgb_model_version: '1'
+
+    gnn_model_name: 'credit_card_gnn'
+    gnn_model_version: '1'
+    # config file for xgboost serving
+    xgb_serve_config_file: "/workspace/configs/xgb-serve-credit-card-config.yaml"
+    # input example dataset file for predict
+    input_dataset_example_file: "/workspace/datasets/xgb-credit_card_example.csv"
+    gnn_required: true
+  airbnb:
+    app_title: "Airbnb Fraud Detection"
+    # model name for xgboost model
+    xgb_model_name: "airbnb_xgb"
+    # model version for xgboost model
+    xgb_model_version: '1'
+    # config file for xgboost serving
+    xgb_serve_config_file: "/workspace/configs/xgb-serve-airbnb-config.yaml"
+    # input example dataset file for predict
+    input_dataset_example_file: "/workspace/datasets/xgb-airbnb_example.csv"
+    gnn_required: false
+  loytal:
+     app_title: "Airbnb Fraud Detection"
+    # input example dataset file for predict
+     input_dataset_example_file: "/workspace/datasets/xgb-credit_card_example.csv"
+
+

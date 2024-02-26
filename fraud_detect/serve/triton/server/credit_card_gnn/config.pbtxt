@@ -1,0 +1,18 @@
+backend: "python"
+name: "credit_card_gnn"
+max_batch_size: 32
+input [
+ {
+    name: "input__0"
+    data_type: TYPE_STRING
+    dims: [ 14 ]
+  }
+]
+output [
+ {
+    name: "output__0"
+    data_type: TYPE_FP32
+    dims: [ 64 ]
+  }
+]
+instance_group [{ kind: KIND_CPU }]

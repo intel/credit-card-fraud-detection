@@ -1,0 +1,23 @@
+data_processing:
+    pre_splitting_transformation:
+    - one_hot_encoding:
+        room_type: False
+        cancellation_policy: False
+
+    data_splitting:
+        custom_rules: # create 2 datasets called train and test using the following conditions
+            train: 'df.index < 3000'
+            test: 'df.index >= 3000'
+        # random_split:
+        #     test_ratio: 0.1
+            
+    post_splitting_transformation: 
+        - target_encoding:  
+            target_col: fraud
+            feature_cols: ["host_response_rate","host_identity_verified","host_total_listings_count","city","is_location_exact","property_type","room_type_1", "room_type_2","accommodates","bathrooms","bedrooms","beds","bed_type","amenities","price","minimum_nights","number_of_reviews","review_scores_rating","instant_bookable","cancellation_policy_1","cancellation_policy_2","cancellation_policy_3","reviews_per_month"]
+            smoothing: 0.001
+            encoders_path: /workspace/models/airbnb_xgb/1/target_encoder.pkl
+
+
+
+classification_threshold: 0.8

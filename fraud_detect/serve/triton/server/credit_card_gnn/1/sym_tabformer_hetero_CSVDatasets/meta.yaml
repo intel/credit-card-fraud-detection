@@ -1,0 +1,17 @@
+dataset_name: sym_tabformer_hetero_CSVDatasets
+node_data:
+- file_name: nodes_0.csv
+  ntype: card_id_Idx
+- file_name: nodes_1.csv
+  ntype: merchant_id_Idx
+edge_data:
+- file_name: edges_0.csv
+  etype:
+  - card_id_Idx
+  - transaction
+  - merchant_id_Idx
+- file_name: edges_1.csv
+  etype:
+  - merchant_id_Idx
+  - sym_transaction
+  - card_id_Idx

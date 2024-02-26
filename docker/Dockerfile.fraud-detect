@@ -1,0 +1,34 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+FROM intel/intel-optimized-ml:scikit-learn-2023.1.1-xgboost-1.7.5-pip-base as base
+
+RUN apt-get -y update && apt-get -y upgrade && \
+    apt-get -y install --no-install-recommends openssh-server wget vim net-tools git-all htop python3-dev build-essential && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+#The tritonclient Python package requires that the libb64 library be available
+# RUN apt-get -y install libb64-dev
+
+RUN ssh-keygen -t rsa -f /root/.ssh/id_rsa -P '' && \
+    cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && \
+    sed -i 's/#   Port 22/Port 12345/' /etc/ssh/ssh_config && \
+    sed -i 's/#Port 22/Port 12345/' /etc/ssh/sshd_config
+
+WORKDIR /fraud-detection
+## Copy requirements and install packages
+COPY ../environments /fraud-detection/environments
+COPY ../setup.py /fraud-detection/setup.py
+COPY ../README.md /fraud-detection/README.md
+COPY ../wrapper.sh /fraud-detection/wrapper.sh
+COPY ../fraud_detect /fraud-detection/fraud_detect
+COPY ../third_party_programs.txt /licensing/third_party_programs.txt
+RUN pip install .[all]
+
+
+## Copy config, models and dataset
+COPY ../configs/single-node /workspace/configs
+COPY ../datasets /workspace/datasets
+
+
+CMD ["sh", "-c", "service ssh start; bash"]

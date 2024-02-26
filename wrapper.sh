@@ -43,7 +43,12 @@ while [[ "$#" -gt "0" ]]; do
           python start-workflow.py --config-file ${CONFIG_FILE:-"/workspace/configs/workflow-baseline.yaml"} --mode 1
           shift
           ;;
-        **)
+      --xgb-serve)
+          serve_config=${SERVE_CONFIG:-"/workspace/configs/workflow-xgb-serve.yaml"}
+          python fraud_detect/serve/serve.py --config ${serve_config}
+          shift
+          ;;
+      **)
           echo "Wrong argument passed"
           exit 1
     esac
