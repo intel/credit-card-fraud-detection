@@ -1,0 +1,4 @@
+pandas==1.5.3
+xgboost==1.7.5
+loguru==0.7.2
+category-encoders==2.6.1

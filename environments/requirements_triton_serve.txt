@@ -1,0 +1,19 @@
+torch==1.13.1 --extra-index-url https://download.pytorch.org/whl/cpu
+intel-extension-for-pytorch==2.0.0 -f https://developer.intel.com/ipex-whl-stable
+torchmetrics==0.11.4
+numpy==1.23.5
+pydantic>=1.9.0
+pyyaml==6.0
+scikit-learn==1.0.2
+chardet==5.1.0
+psutil==5.9.0
+ogb==1.3.6
+tqdm
+cmake
+category_encoders
+dgl -f https://data.dgl.ai/wheels-test/repo.html
+dglgo -f https://data.dgl.ai/wheels-test/repo.html
+certifi==2022.12.7
+urllib3==1.26.5
+setuptools==65.5.1
+pandas==1.5.3
